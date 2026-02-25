@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rocket League Mini</title>
+    <title>Rocked-Ege</title>
     <style>
         * {
             margin: 0;
@@ -25,6 +25,13 @@
             padding: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
         }
+        h1 {
+            color: #e94560;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            text-shadow: 0 0 10px #e94560;
+        }
         canvas {
             display: block;
             margin: 0 auto;
@@ -33,7 +40,7 @@
             box-shadow: inset 0 0 20px rgba(0,0,0,0.6);
             width: 100%;
             height: auto;
-            touch-action: none; /* Verhindert Scrollen bei Touch */
+            touch-action: none;
         }
         #scoreboard {
             display: flex;
@@ -44,7 +51,7 @@
             padding: 10px 30px;
             background: #1a1a2e;
             border-radius: 50px;
-            margin-bottom: 10px;
+            margin: 10px 0;
         }
         #scoreboard span {
             color: #e94560;
@@ -69,13 +76,14 @@
 </head>
 <body>
     <div id="gameContainer">
+        <h1>⚡ Rocked-Ege ⚡</h1>
         <div id="scoreboard">
             <span id="scorePlayer">0</span> : <span id="scoreEnemy">0</span>
         </div>
         <canvas id="gameCanvas" width="800" height="400"></canvas>
         <div id="controls">
-            <p>⚡ WASD oder Pfeiltasten = fahren | Leertaste = springen/fliegen</p>
-            <p>👆 Auf Handy: Bildschirm antippen = springen (zum Lenken Auto antippen und ziehen)</p>
+            <p>🚗 PC: WASD / Pfeiltasen = fahren | Leertaste = springen/fliegen</p>
+            <p>📱 Handy: linke Seite antippen = springen | ziehen zum Lenken</p>
             <button id="resetBtn">Neustart</button>
         </div>
     </div>
@@ -89,8 +97,8 @@
         const FIELD_WIDTH = 800;
         const FIELD_HEIGHT = 400;
         const GOAL_WIDTH = 30;      // Tiefe der Tore
-        const GOAL_HEIGHT = 100;     // Höhe der Tore (in der Mitte)
-        const WALL_SIZE = 20;        // Dicke der unsichtbaren Wände
+        const GOAL_HEIGHT = 100;     // Höhe der Tore
+        const WALL_SIZE = 20;        // Dicke der Wände
 
         // ---------- Punktestand ----------
         let playerScore = 0;
@@ -101,7 +109,7 @@
         // ---------- Spieler-Auto ----------
         const player = {
             x: 200, y: 200,
-            angle: 0,               // Richtung in Rad
+            angle: 0,
             speed: 0,
             maxSpeed: 3,
             accel: 0.2,
@@ -112,10 +120,10 @@
             boostEndTime: 0,
             canJump: true,
             inAir: false,
-            vx: 0, vy: 0            // Geschwindigkeit für Flug
+            vx: 0, vy: 0
         };
 
-        // ---------- Gegner-Auto (einfache KI) ----------
+        // ---------- Gegner-Auto (KI) ----------
         const enemy = {
             x: 600, y: 200,
             angle: Math.PI,
@@ -144,7 +152,7 @@
         const boosts = [
             { x: 200, y: 100, active: true, radius: 15, respawnTime: 0 },
             { x: 600, y: 300, active: true, radius: 15, respawnTime: 0 },
-            { x: 400, y: 200, active: true, radius: 15, respawnTime: 0 } // in der Mitte
+            { x: 400, y: 200, active: true, radius: 15, respawnTime: 0 }
         ];
 
         // ---------- Tastaturzustand ----------
@@ -154,14 +162,14 @@
             space: false
         };
 
-        // ---------- Touch-Steuerung (einfach) ----------
+        // ---------- Touch-Steuerung ----------
         let touchStartX = 0, touchStartY = 0;
         let touchMoveX = 0, touchMoveY = 0;
         let isTouching = false;
 
-        // ---------- Event-Listener für Tastatur ----------
+        // ---------- Event-Listener ----------
         window.addEventListener('keydown', (e) => {
-            e.preventDefault(); // Verhindert Seiten-Scrollen
+            e.preventDefault();
             const key = e.key;
             if (key === 'ArrowUp') keys.ArrowUp = true;
             if (key === 'ArrowDown') keys.ArrowDown = true;
@@ -173,7 +181,7 @@
             if (key === 'd' || key === 'D') keys.d = true;
             if (key === ' ') {
                 keys.space = true;
-                e.preventDefault(); // Wichtig für Space
+                e.preventDefault();
             }
         });
 
@@ -190,7 +198,6 @@
             if (key === ' ') keys.space = false;
         });
 
-        // ---------- Touch-Events (mobil) ----------
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
             const touch = e.touches[0];
@@ -203,17 +210,14 @@
             touchMoveY = touchStartY;
             isTouching = true;
 
-            // Einfache Erkennung: Wenn auf linke Hälfte getippt wird, soll das Auto springen
-            // (bessere Steuerung wäre ein Joystick, aber das ist ein schneller Ersatz)
+            // Linke Bildschirmhälfte = springen
             if (touchStartX < canvas.width / 2) {
-                // Spieler springt
                 if (!player.inAir && player.canJump) {
                     player.inAir = true;
                     player.canJump = false;
                     player.vx = Math.cos(player.angle) * 5;
                     player.vy = Math.sin(player.angle) * 5;
-                    // Kleiner Aufwärtsimpuls
-                    player.vy -= 2; // nach oben (Bildschirm-Y zeigt nach unten, deshalb negativ)
+                    player.vy -= 2;
                 }
             }
         });
@@ -227,11 +231,10 @@
             touchMoveX = (touch.clientX - rect.left) * scaleX;
             touchMoveY = (touch.clientY - rect.top) * scaleY;
 
-            // Lenkung: Differenz zur Startposition nutzen (einfach)
             const dx = touchMoveX - touchStartX;
             if (Math.abs(dx) > 20) {
-                if (dx > 0) player.angle += 0.05; // rechts lenken
-                else player.angle -= 0.05; // links lenken
+                if (dx > 0) player.angle += 0.05;
+                else player.angle -= 0.05;
             }
         });
 
@@ -240,7 +243,6 @@
             isTouching = false;
         });
 
-        // ---------- Reset-Button ----------
         document.getElementById('resetBtn').addEventListener('click', resetGame);
 
         function resetGame() {
@@ -256,28 +258,23 @@
             ball.x = 400; ball.y = 200; ball.vx = 0; ball.vy = 0;
         }
 
-        // ---------- Punktestand aktualisieren ----------
         function updateScore() {
             scorePlayerEl.textContent = playerScore;
             scoreEnemyEl.textContent = enemyScore;
         }
 
-        // ---------- Kollision Auto mit Ball (sehr einfach, wie Billard) ----------
         function handleBallCollision(car, ball) {
-            // Abstand zwischen Autos und Ball
             let dx = ball.x - car.x;
             let dy = ball.y - car.y;
             let dist = Math.sqrt(dx*dx + dy*dy);
-            let minDist = car.width/2 + ball.radius; // grobe Näherung
+            let minDist = car.width/2 + ball.radius;
 
             if (dist < minDist) {
-                // Einfache Richtungsänderung: Ball bekommt Impuls in Richtung der Autobewegung
                 let angle = car.angle;
                 let power = 5 + Math.abs(car.speed) * 2;
                 ball.vx += Math.cos(angle) * power;
                 ball.vy += Math.sin(angle) * power;
 
-                // Auto etwas zurückdrücken (verhindert Durchdringen)
                 let overlap = minDist - dist;
                 let pushX = dx / dist * overlap * 0.5;
                 let pushY = dy / dist * overlap * 0.5;
@@ -288,14 +285,11 @@
             }
         }
 
-        // ---------- Torerkennung ----------
         function checkGoal() {
-            // Linkes Tor (Spielertor): x < 0 + GOAL_WIDTH, y zwischen (FIELD_HEIGHT/2 - GOAL_HEIGHT/2) und (FIELD_HEIGHT/2 + GOAL_HEIGHT/2)
+            // Linkes Tor (Spielertor)
             if (ball.x - ball.radius < GOAL_WIDTH && 
                 ball.y > (FIELD_HEIGHT/2 - GOAL_HEIGHT/2) && 
                 ball.y < (FIELD_HEIGHT/2 + GOAL_HEIGHT/2)) {
-                // Gegner tor (weil Ball im eigenen Tor?)
-                // In Rocket League: Ball im eigenen Tor = Punkt für Gegner
                 enemyScore++;
                 updateScore();
                 resetPositions();
@@ -313,7 +307,6 @@
             }
         }
 
-        // ---------- Boost-Felder einsammeln ----------
         function collectBoosts(car) {
             for (let b of boosts) {
                 if (!b.active) continue;
@@ -322,158 +315,119 @@
                 let dist = Math.sqrt(dx*dx + dy*dy);
                 if (dist < car.width/2 + b.radius) {
                     b.active = false;
-                    b.respawnTime = 300; // ticks bis Respawn
-                    // Boost-Effekt: Auto wird kurz schneller
+                    b.respawnTime = 300;
                     car.isBoosting = true;
-                    car.boostEndTime = 60; // 60 frames = ca. 1 Sek bei 60fps
+                    car.boostEndTime = 60;
                 }
             }
         }
 
-        // ---------- Gegner-KI (einfach) ----------
         function updateEnemy() {
             if (enemy.inAir) {
-                // Flugphysik (keine Bodenhaftung)
                 enemy.x += enemy.vx;
                 enemy.y += enemy.vy;
-                // Luftwiderstand
                 enemy.vx *= 0.98;
                 enemy.vy *= 0.98;
-                // Landung? (einfach: wenn Boden y > ? eigentlich immer auf Boden-Höhe? Wir lassen es in Luft, kein Boden)
-                // aber wir wollen, dass er nach einer Zeit wieder landet – der Einfachheit halber setzen wir Landung nach 30 Frames
-                // (wird später besser gelöst)
-                if (enemy.boostEndTime <= 0) { // Boosten als Timer für Flugdauer
+                if (enemy.boostEndTime <= 0) {
                     enemy.inAir = false;
                     enemy.canJump = true;
                 }
             } else {
-                // Boden: Richtung Ball
                 let dx = ball.x - enemy.x;
                 let dy = ball.y - enemy.y;
                 let targetAngle = Math.atan2(dy, dx);
-                // Winkel sanft anpassen
                 let angleDiff = targetAngle - enemy.angle;
-                // Normalisieren
                 while (angleDiff > Math.PI) angleDiff -= 2*Math.PI;
                 while (angleDiff < -Math.PI) angleDiff += 2*Math.PI;
                 enemy.angle += Math.sign(angleDiff) * Math.min(Math.abs(angleDiff), enemy.turnSpeed);
 
-                // Beschleunigen
                 enemy.speed += enemy.accel;
                 if (enemy.speed > enemy.maxSpeed) enemy.speed = enemy.maxSpeed;
 
-                // Bewegung
                 enemy.x += Math.cos(enemy.angle) * enemy.speed;
                 enemy.y += Math.sin(enemy.angle) * enemy.speed;
 
-                // Wenn nahe am Ball und springen bereit, dann springen (fliegen)
                 let distToBall = Math.hypot(ball.x - enemy.x, ball.y - enemy.y);
                 if (distToBall < 60 && enemy.canJump) {
                     enemy.inAir = true;
                     enemy.canJump = false;
                     enemy.vx = Math.cos(enemy.angle) * 5;
                     enemy.vy = Math.sin(enemy.angle) * 5;
-                    enemy.boostEndTime = 30; // Flugdauer
+                    enemy.boostEndTime = 30;
                 }
             }
 
-            // Boost-Effekt
             if (enemy.isBoosting) {
                 enemy.boostEndTime--;
                 if (enemy.boostEndTime <= 0) enemy.isBoosting = false;
             }
-            if (enemy.isBoosting) {
-                enemy.maxSpeed = 4;
-            } else {
-                enemy.maxSpeed = 2.5;
-            }
+            enemy.maxSpeed = enemy.isBoosting ? 4 : 2.5;
 
-            // Grenzen (Wände)
             enemy.x = Math.max(WALL_SIZE + enemy.width/2, Math.min(FIELD_WIDTH - WALL_SIZE - enemy.width/2, enemy.x));
             enemy.y = Math.max(WALL_SIZE + enemy.height/2, Math.min(FIELD_HEIGHT - WALL_SIZE - enemy.height/2, enemy.y));
 
-            // Boost einsammeln
             collectBoosts(enemy);
         }
 
-        // ---------- Spieler aktualisieren ----------
         function updatePlayer() {
-            // Tastatur in Bewegung umsetzen
             let moveX = 0, moveY = 0;
             if (keys.ArrowUp || keys.w) moveY -= 1;
             if (keys.ArrowDown || keys.s) moveY += 1;
             if (keys.ArrowLeft || keys.a) moveX -= 1;
             if (keys.ArrowRight || keys.d) moveX += 1;
 
-            // Lenkung basierend auf horizontaler Eingabe
             if (moveX !== 0) {
                 player.angle += moveX * player.turnSpeed;
             }
 
-            // Vorwärts/rückwärts
             if (moveY !== 0) {
                 player.speed += moveY * player.accel;
                 if (player.speed > player.maxSpeed) player.speed = player.maxSpeed;
-                if (player.speed < -player.maxSpeed/2) player.speed = -player.maxSpeed/2; // rückwärts langsamer
+                if (player.speed < -player.maxSpeed/2) player.speed = -player.maxSpeed/2;
             } else {
-                // Reibung
                 player.speed *= 0.95;
             }
 
-            // Bewegung
             if (!player.inAir) {
                 player.x += Math.cos(player.angle) * player.speed;
                 player.y += Math.sin(player.angle) * player.speed;
             } else {
-                // Flug: eigene Geschwindigkeit
                 player.x += player.vx;
                 player.y += player.vy;
                 player.vx *= 0.98;
                 player.vy *= 0.98;
-                // Landen wenn Geschwindigkeit sehr niedrig oder Timer abgelaufen
                 if (Math.abs(player.vx) < 0.1 && Math.abs(player.vy) < 0.1) {
                     player.inAir = false;
                     player.canJump = true;
                 }
             }
 
-            // Springen (Leertaste)
             if (keys.space && !player.inAir && player.canJump) {
                 player.inAir = true;
                 player.canJump = false;
                 player.vx = Math.cos(player.angle) * 5;
                 player.vy = Math.sin(player.angle) * 5;
-                // Aufwärtsimpuls
                 player.vy -= 2;
             }
 
-            // Boost-Effekt
             if (player.isBoosting) {
                 player.boostEndTime--;
                 if (player.boostEndTime <= 0) player.isBoosting = false;
             }
-            if (player.isBoosting) {
-                player.maxSpeed = 4;
-            } else {
-                player.maxSpeed = 3;
-            }
+            player.maxSpeed = player.isBoosting ? 4 : 3;
 
-            // Grenzen
             player.x = Math.max(WALL_SIZE + player.width/2, Math.min(FIELD_WIDTH - WALL_SIZE - player.width/2, player.x));
             player.y = Math.max(WALL_SIZE + player.height/2, Math.min(FIELD_HEIGHT - WALL_SIZE - player.height/2, player.y));
 
-            // Boosts einsammeln
             collectBoosts(player);
         }
 
-        // ---------- Ball aktualisieren (Physik) ----------
         function updateBall() {
             ball.x += ball.vx;
             ball.y += ball.vy;
             ball.vx *= ball.friction;
             ball.vy *= ball.friction;
 
-            // Wände
             if (ball.x - ball.radius < WALL_SIZE) {
                 ball.x = WALL_SIZE + ball.radius;
                 ball.vx *= -0.8;
@@ -492,7 +446,6 @@
             }
         }
 
-        // ---------- Boost-Respawn ----------
         function updateBoosts() {
             for (let b of boosts) {
                 if (!b.active) {
@@ -504,14 +457,12 @@
             }
         }
 
-        // ---------- Kollisionen Auto mit Auto (rudimentär) ----------
         function handleCarCollision() {
             let dx = enemy.x - player.x;
             let dy = enemy.y - player.y;
             let dist = Math.sqrt(dx*dx + dy*dy);
             let minDist = (player.width + enemy.width) / 2;
             if (dist < minDist) {
-                // Stoßrichtung
                 let angle = Math.atan2(dy, dx);
                 let overlap = minDist - dist;
                 let pushX = Math.cos(angle) * overlap * 0.5;
@@ -521,22 +472,18 @@
                 enemy.x += pushX;
                 enemy.y += pushY;
 
-                // Geschwindigkeitstausch (einfach)
                 let vRel = (player.speed - enemy.speed) * 0.5;
                 player.speed += vRel;
                 enemy.speed -= vRel;
             }
         }
 
-        // ---------- Zeichnen ----------
         function draw() {
             ctx.clearRect(0, 0, FIELD_WIDTH, FIELD_HEIGHT);
 
-            // Feld
             ctx.fillStyle = '#0f3460';
             ctx.fillRect(0, 0, FIELD_WIDTH, FIELD_HEIGHT);
 
-            // Mittellinie
             ctx.strokeStyle = 'white';
             ctx.lineWidth = 2;
             ctx.setLineDash([10, 15]);
@@ -546,16 +493,12 @@
             ctx.stroke();
             ctx.setLineDash([]);
 
-            // Tore
             ctx.fillStyle = '#e94560';
             ctx.globalAlpha = 0.3;
-            // Linkes Tor
             ctx.fillRect(0, FIELD_HEIGHT/2 - GOAL_HEIGHT/2, GOAL_WIDTH, GOAL_HEIGHT);
-            // Rechtes Tor
             ctx.fillRect(FIELD_WIDTH - GOAL_WIDTH, FIELD_HEIGHT/2 - GOAL_HEIGHT/2, GOAL_WIDTH, GOAL_HEIGHT);
             ctx.globalAlpha = 1;
 
-            // Boost-Felder
             for (let b of boosts) {
                 if (b.active) {
                     ctx.beginPath();
@@ -569,7 +512,6 @@
             ctx.shadowBlur = 0;
             ctx.shadowColor = 'transparent';
 
-            // Ball
             ctx.beginPath();
             ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2);
             ctx.fillStyle = '#f9c74f';
@@ -580,7 +522,6 @@
             ctx.lineWidth = 2;
             ctx.stroke();
 
-            // Spieler-Auto (blau)
             ctx.save();
             ctx.translate(player.x, player.y);
             ctx.rotate(player.angle);
@@ -590,7 +531,6 @@
             ctx.fillRect(-player.width/2, -player.height/2, player.width, player.height);
             ctx.restore();
 
-            // Gegner-Auto (rot)
             ctx.save();
             ctx.translate(enemy.x, enemy.y);
             ctx.rotate(enemy.angle);
@@ -603,7 +543,6 @@
             ctx.shadowBlur = 0;
         }
 
-        // ---------- Hauptschleife ----------
         function gameLoop() {
             updatePlayer();
             updateEnemy();
