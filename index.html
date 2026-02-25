@@ -52,25 +52,34 @@
             height: auto;
             touch-action: none;
         }
+        /* VERGRÖSSERTER PUNKTESTAND */
         #scoreboard {
             display: flex;
             justify-content: space-between;
             color: white;
-            font-size: 2.5rem;
+            font-size: 3.5rem;        /* Deutlich größer */
             font-weight: bold;
-            padding: 5px 40px;
+            padding: 10px 50px;         /* Mehr Platz */
             background: #0b1424;
-            border-radius: 60px;
+            border-radius: 80px;        /* Angepasst */
             margin: 15px 0;
-            border: 2px solid #3a506b;
+            border: 3px solid #3a506b;  /* Dickerer Rand */
+            box-shadow: 0 0 20px #4d9fff; /* Leuchtender Schatten */
         }
         #scoreboard .blue {
             color: #4d9fff;
-            text-shadow: 0 0 10px #4d9fff;
+            text-shadow: 0 0 15px #4d9fff;
         }
         #scoreboard .red {
             color: #ff6b6b;
-            text-shadow: 0 0 10px #ff6b6b;
+            text-shadow: 0 0 15px #ff6b6b;
+        }
+        /* Für kleine Bildschirme (Handys) etwas kleiner */
+        @media (max-width: 600px) {
+            #scoreboard {
+                font-size: 2.5rem;
+                padding: 8px 30px;
+            }
         }
         #controls {
             color: #ccddee;
