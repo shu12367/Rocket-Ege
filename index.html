@@ -10,6 +10,7 @@
             padding: 0;
             box-sizing: border-box;
             user-select: none;
+            touch-action: none; /* Verhindert Browser-Gesten */
         }
         body {
             background: #1a1a2e;
@@ -24,6 +25,7 @@
             border-radius: 20px;
             padding: 20px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            max-width: 100%;
         }
         h1 {
             color: #e94560;
@@ -82,8 +84,8 @@
         </div>
         <canvas id="gameCanvas" width="800" height="400"></canvas>
         <div id="controls">
-            <p>🚗 PC: WASD / Pfeiltasen = fahren | Leertaste = springen/fliegen</p>
-            <p>📱 Handy: linke Seite antippen = springen | ziehen zum Lenken</p>
+            <p>🖥️ PC: WASD / Pfeiltasten = fahren | Leertaste = springen</p>
+            <p>📱 Handy: Linker Bildschirm = Joystick fahren | Rechter Bildschirm = Boost/Springen</p>
             <button id="resetBtn">Neustart</button>
         </div>
     </div>
@@ -96,9 +98,9 @@
         // ---------- Spielfeld-Größen ----------
         const FIELD_WIDTH = 800;
         const FIELD_HEIGHT = 400;
-        const GOAL_WIDTH = 30;      // Tiefe der Tore
-        const GOAL_HEIGHT = 100;     // Höhe der Tore
-        const WALL_SIZE = 20;        // Dicke der Wände
+        const GOAL_WIDTH = 30;
+        const GOAL_HEIGHT = 100;
+        const WALL_SIZE = 20;
 
         // ---------- Punktestand ----------
         let playerScore = 0;
@@ -128,16 +130,17 @@
             x: 600, y: 200,
             angle: Math.PI,
             speed: 0,
-            maxSpeed: 2.5,
-            accel: 0.15,
-            turnSpeed: 0.03,
+            maxSpeed: 2.8, // etwas erhöht für mehr Druck
+            accel: 0.18,
+            turnSpeed: 0.04,
             width: 25,
             height: 15,
             isBoosting: false,
             boostEndTime: 0,
             canJump: true,
             inAir: false,
-            vx: 0, vy: 0
+            vx: 0, vy: 0,
+            jumpCooldown: 0   // damit er nicht dauernd springt
         };
 
         // ---------- Ball ----------
@@ -162,12 +165,18 @@
             space: false
         };
 
-        // ---------- Touch-Steuerung ----------
-        let touchStartX = 0, touchStartY = 0;
-        let touchMoveX = 0, touchMoveY = 0;
-        let isTouching = false;
+        // ---------- Joystick-Variablen ----------
+        let joystickActive = false;
+        let joystickPos = { x: 0, y: 0 };        // aktuelle Fingerposition (in Canvas-Koordinaten)
+        let joystickStart = { x: 0, y: 0 };       // Startposition (Mittelpunkt)
+        let joystickVector = { x: 0, y: 0 };       // normalisierter Richtungsvektor (-1..1)
+        let moveXJoy = 0, moveYJoy = 0;            // daraus abgeleitete Steuerungswerte
 
-        // ---------- Event-Listener ----------
+        // ---------- Boost-Button ----------
+        let boostPressed = false;
+        const BOOST_BUTTON_SIZE = 60; // nur für visuelle Darstellung, der Bereich ist die rechte Hälfte
+
+        // ---------- Event-Listener für Tastatur ----------
         window.addEventListener('keydown', (e) => {
             e.preventDefault();
             const key = e.key;
@@ -198,49 +207,99 @@
             if (key === ' ') keys.space = false;
         });
 
+        // ---------- Touch-Events für Joystick und Boost ----------
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
-            const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            touchStartX = (touch.clientX - rect.left) * scaleX;
-            touchStartY = (touch.clientY - rect.top) * scaleY;
-            touchMoveX = touchStartX;
-            touchMoveY = touchStartY;
-            isTouching = true;
+            const touches = e.touches;
+            for (let i = 0; i < touches.length; i++) {
+                const touch = touches[i];
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const canvasX = (touch.clientX - rect.left) * scaleX;
+                const canvasY = (touch.clientY - rect.top) * scaleY;
 
-            // Linke Bildschirmhälfte = springen
-            if (touchStartX < canvas.width / 2) {
-                if (!player.inAir && player.canJump) {
-                    player.inAir = true;
-                    player.canJump = false;
-                    player.vx = Math.cos(player.angle) * 5;
-                    player.vy = Math.sin(player.angle) * 5;
-                    player.vy -= 2;
+                // Linke Hälfte = Joystick
+                if (canvasX < canvas.width / 2) {
+                    joystickActive = true;
+                    joystickStart.x = canvasX;
+                    joystickStart.y = canvasY;
+                    joystickPos.x = canvasX;
+                    joystickPos.y = canvasY;
+                    joystickVector.x = 0;
+                    joystickVector.y = 0;
+                }
+                // Rechte Hälfte = Boost-Button
+                else {
+                    boostPressed = true;
+                    // Springen auslösen, wenn nicht in der Luft
+                    if (!player.inAir && player.canJump) {
+                        player.inAir = true;
+                        player.canJump = false;
+                        player.vx = Math.cos(player.angle) * 5;
+                        player.vy = Math.sin(player.angle) * 5;
+                        player.vy -= 2; // Aufwärtsimpuls
+                    }
                 }
             }
         });
 
         canvas.addEventListener('touchmove', (e) => {
             e.preventDefault();
-            const touch = e.touches[0];
-            const rect = canvas.getBoundingClientRect();
-            const scaleX = canvas.width / rect.width;
-            const scaleY = canvas.height / rect.height;
-            touchMoveX = (touch.clientX - rect.left) * scaleX;
-            touchMoveY = (touch.clientY - rect.top) * scaleY;
+            const touches = e.touches;
+            for (let i = 0; i < touches.length; i++) {
+                const touch = touches[i];
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const canvasX = (touch.clientX - rect.left) * scaleX;
+                const canvasY = (touch.clientY - rect.top) * scaleY;
 
-            const dx = touchMoveX - touchStartX;
-            if (Math.abs(dx) > 20) {
-                if (dx > 0) player.angle += 0.05;
-                else player.angle -= 0.05;
+                // Nur den Joystick-Finger beachten (wir nehmen einfach den ersten, der links ist)
+                if (canvasX < canvas.width / 2 && joystickActive) {
+                    joystickPos.x = canvasX;
+                    joystickPos.y = canvasY;
+
+                    // Vektor vom Startpunkt zum aktuellen Punkt
+                    let dx = joystickPos.x - joystickStart.x;
+                    let dy = joystickPos.y - joystickStart.y;
+                    // Begrenzung auf Radius 50 (maximale Auslenkung)
+                    const maxDist = 50;
+                    let dist = Math.sqrt(dx*dx + dy*dy);
+                    if (dist > maxDist) {
+                        dx = (dx / dist) * maxDist;
+                        dy = (dy / dist) * maxDist;
+                        joystickPos.x = joystickStart.x + dx;
+                        joystickPos.y = joystickStart.y + dy;
+                    }
+                    // Normalisierte Werte (-1..1)
+                    joystickVector.x = dx / maxDist;
+                    joystickVector.y = dy / maxDist;
+                }
             }
         });
 
         canvas.addEventListener('touchend', (e) => {
             e.preventDefault();
-            isTouching = false;
+            // Wenn keine Finger mehr auf dem Joystick-Bereich sind, deaktivieren
+            let touchOnLeft = false;
+            const touches = e.touches;
+            for (let i = 0; i < touches.length; i++) {
+                const touch = touches[i];
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                const scaleY = canvas.height / rect.height;
+                const canvasX = (touch.clientX - rect.left) * scaleX;
+                if (canvasX < canvas.width / 2) touchOnLeft = true;
+            }
+            if (!touchOnLeft) {
+                joystickActive = false;
+                joystickVector.x = 0;
+                joystickVector.y = 0;
+            }
+
+            // Boost loslassen
+            boostPressed = false;
         });
 
         document.getElementById('resetBtn').addEventListener('click', resetGame);
@@ -286,7 +345,7 @@
         }
 
         function checkGoal() {
-            // Linkes Tor (Spielertor)
+            // Linkes Tor
             if (ball.x - ball.radius < GOAL_WIDTH && 
                 ball.y > (FIELD_HEIGHT/2 - GOAL_HEIGHT/2) && 
                 ball.y < (FIELD_HEIGHT/2 + GOAL_HEIGHT/2)) {
@@ -296,7 +355,7 @@
                 return;
             }
 
-            // Rechtes Tor (Gegnertor)
+            // Rechtes Tor
             if (ball.x + ball.radius > FIELD_WIDTH - GOAL_WIDTH && 
                 ball.y > (FIELD_HEIGHT/2 - GOAL_HEIGHT/2) && 
                 ball.y < (FIELD_HEIGHT/2 + GOAL_HEIGHT/2)) {
@@ -323,6 +382,7 @@
         }
 
         function updateEnemy() {
+            // KI: Immer auf den Ball zu
             if (enemy.inAir) {
                 enemy.x += enemy.vx;
                 enemy.y += enemy.vy;
@@ -347,21 +407,25 @@
                 enemy.x += Math.cos(enemy.angle) * enemy.speed;
                 enemy.y += Math.sin(enemy.angle) * enemy.speed;
 
+                // Springen, wenn nah am Ball und Cooldown vorbei
                 let distToBall = Math.hypot(ball.x - enemy.x, ball.y - enemy.y);
-                if (distToBall < 60 && enemy.canJump) {
+                if (distToBall < 70 && enemy.canJump && enemy.jumpCooldown <= 0) {
                     enemy.inAir = true;
                     enemy.canJump = false;
-                    enemy.vx = Math.cos(enemy.angle) * 5;
-                    enemy.vy = Math.sin(enemy.angle) * 5;
-                    enemy.boostEndTime = 30;
+                    enemy.vx = Math.cos(enemy.angle) * 5.5;
+                    enemy.vy = Math.sin(enemy.angle) * 5.5;
+                    enemy.boostEndTime = 25;
+                    enemy.jumpCooldown = 40; // kurz warten, bevor er wieder springen kann
                 }
             }
+
+            if (enemy.jumpCooldown > 0) enemy.jumpCooldown--;
 
             if (enemy.isBoosting) {
                 enemy.boostEndTime--;
                 if (enemy.boostEndTime <= 0) enemy.isBoosting = false;
             }
-            enemy.maxSpeed = enemy.isBoosting ? 4 : 2.5;
+            enemy.maxSpeed = enemy.isBoosting ? 4 : 2.8;
 
             enemy.x = Math.max(WALL_SIZE + enemy.width/2, Math.min(FIELD_WIDTH - WALL_SIZE - enemy.width/2, enemy.x));
             enemy.y = Math.max(WALL_SIZE + enemy.height/2, Math.min(FIELD_HEIGHT - WALL_SIZE - enemy.height/2, enemy.y));
@@ -370,17 +434,28 @@
         }
 
         function updatePlayer() {
+            // Steuerungswerte aus Tastatur oder Joystick holen
             let moveX = 0, moveY = 0;
+
+            // Tastatur (Vorrang)
             if (keys.ArrowUp || keys.w) moveY -= 1;
             if (keys.ArrowDown || keys.s) moveY += 1;
             if (keys.ArrowLeft || keys.a) moveX -= 1;
             if (keys.ArrowRight || keys.d) moveX += 1;
 
+            // Wenn Tastatur nicht genutzt wird, Joystick verwenden
+            if (moveX === 0 && moveY === 0 && joystickActive) {
+                moveX = joystickVector.x;
+                moveY = joystickVector.y;
+            }
+
+            // Bewegung umsetzen
             if (moveX !== 0) {
                 player.angle += moveX * player.turnSpeed;
             }
 
             if (moveY !== 0) {
+                // Vorwärts/rückwärts: moveY negativ = vorwärts, positiv = rückwärts
                 player.speed += moveY * player.accel;
                 if (player.speed > player.maxSpeed) player.speed = player.maxSpeed;
                 if (player.speed < -player.maxSpeed/2) player.speed = -player.maxSpeed/2;
@@ -388,6 +463,7 @@
                 player.speed *= 0.95;
             }
 
+            // Position aktualisieren (Boden / Luft)
             if (!player.inAir) {
                 player.x += Math.cos(player.angle) * player.speed;
                 player.y += Math.sin(player.angle) * player.speed;
@@ -402,6 +478,7 @@
                 }
             }
 
+            // Springen per Tastatur
             if (keys.space && !player.inAir && player.canJump) {
                 player.inAir = true;
                 player.canJump = false;
@@ -410,12 +487,14 @@
                 player.vy -= 2;
             }
 
+            // Boost-Effekt
             if (player.isBoosting) {
                 player.boostEndTime--;
                 if (player.boostEndTime <= 0) player.isBoosting = false;
             }
             player.maxSpeed = player.isBoosting ? 4 : 3;
 
+            // Begrenzung
             player.x = Math.max(WALL_SIZE + player.width/2, Math.min(FIELD_WIDTH - WALL_SIZE - player.width/2, player.x));
             player.y = Math.max(WALL_SIZE + player.height/2, Math.min(FIELD_HEIGHT - WALL_SIZE - player.height/2, player.y));
 
@@ -481,9 +560,11 @@
         function draw() {
             ctx.clearRect(0, 0, FIELD_WIDTH, FIELD_HEIGHT);
 
+            // Spielfeld
             ctx.fillStyle = '#0f3460';
             ctx.fillRect(0, 0, FIELD_WIDTH, FIELD_HEIGHT);
 
+            // Mittellinie
             ctx.strokeStyle = 'white';
             ctx.lineWidth = 2;
             ctx.setLineDash([10, 15]);
@@ -493,12 +574,14 @@
             ctx.stroke();
             ctx.setLineDash([]);
 
+            // Tore
             ctx.fillStyle = '#e94560';
             ctx.globalAlpha = 0.3;
             ctx.fillRect(0, FIELD_HEIGHT/2 - GOAL_HEIGHT/2, GOAL_WIDTH, GOAL_HEIGHT);
             ctx.fillRect(FIELD_WIDTH - GOAL_WIDTH, FIELD_HEIGHT/2 - GOAL_HEIGHT/2, GOAL_WIDTH, GOAL_HEIGHT);
             ctx.globalAlpha = 1;
 
+            // Boost-Felder
             for (let b of boosts) {
                 if (b.active) {
                     ctx.beginPath();
@@ -512,6 +595,7 @@
             ctx.shadowBlur = 0;
             ctx.shadowColor = 'transparent';
 
+            // Ball
             ctx.beginPath();
             ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI*2);
             ctx.fillStyle = '#f9c74f';
@@ -522,6 +606,7 @@
             ctx.lineWidth = 2;
             ctx.stroke();
 
+            // Spieler-Auto (blau) mit Markierung vorne
             ctx.save();
             ctx.translate(player.x, player.y);
             ctx.rotate(player.angle);
@@ -529,8 +614,14 @@
             ctx.shadowColor = '#4361ee';
             ctx.shadowBlur = 10;
             ctx.fillRect(-player.width/2, -player.height/2, player.width, player.height);
+            // Vorderes Ende markieren (roter Punkt)
+            ctx.fillStyle = '#ff0000';
+            ctx.beginPath();
+            ctx.arc(player.width/2 - 3, 0, 4, 0, 2*Math.PI);
+            ctx.fill();
             ctx.restore();
 
+            // Gegner-Auto (rot) mit Markierung vorne
             ctx.save();
             ctx.translate(enemy.x, enemy.y);
             ctx.rotate(enemy.angle);
@@ -538,9 +629,50 @@
             ctx.shadowColor = '#e94560';
             ctx.shadowBlur = 10;
             ctx.fillRect(-enemy.width/2, -enemy.height/2, enemy.width, enemy.height);
+            ctx.fillStyle = '#ffff00'; // gelbe Markierung
+            ctx.beginPath();
+            ctx.arc(enemy.width/2 - 3, 0, 4, 0, 2*Math.PI);
+            ctx.fill();
             ctx.restore();
 
             ctx.shadowBlur = 0;
+
+            // Joystick visualisieren (falls aktiv)
+            if (joystickActive) {
+                // Basis
+                ctx.beginPath();
+                ctx.arc(joystickStart.x, joystickStart.y, 40, 0, 2*Math.PI);
+                ctx.fillStyle = 'rgba(255,255,255,0.2)';
+                ctx.fill();
+                ctx.strokeStyle = 'rgba(255,255,255,0.5)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Joystick-Knopf
+                ctx.beginPath();
+                ctx.arc(joystickPos.x, joystickPos.y, 20, 0, 2*Math.PI);
+                ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                ctx.fill();
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            // Boost-Button visualisieren (rechte untere Ecke)
+            if (boostPressed) {
+                ctx.fillStyle = 'rgba(255,0,0,0.3)';
+            } else {
+                ctx.fillStyle = 'rgba(255,255,255,0.1)';
+            }
+            ctx.beginPath();
+            ctx.arc(canvas.width - 80, canvas.height - 80, 50, 0, 2*Math.PI);
+            ctx.fill();
+            ctx.strokeStyle = 'white';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText('BOOST', canvas.width - 115, canvas.height - 65);
         }
 
         function gameLoop() {
