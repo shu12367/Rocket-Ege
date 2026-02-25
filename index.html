@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rocked-Ege ONLINE</title>
+    <title>Rocked-Ege ULTIMATE</title>
     <style>
         * {
             margin: 0;
@@ -26,6 +26,7 @@
             padding: 20px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.8);
             max-width: 100%;
+            position: relative;
         }
         h1 {
             color: #ffd966;
@@ -51,13 +52,59 @@
             height: auto;
             touch-action: none;
         }
+        #scoreboard {
+            display: flex;
+            justify-content: space-between;
+            color: white;
+            font-size: 2.5rem;
+            font-weight: bold;
+            padding: 5px 40px;
+            background: #0b1424;
+            border-radius: 60px;
+            margin: 15px 0;
+            border: 2px solid #3a506b;
+        }
+        #scoreboard .blue {
+            color: #4d9fff;
+            text-shadow: 0 0 10px #4d9fff;
+        }
+        #scoreboard .red {
+            color: #ff6b6b;
+            text-shadow: 0 0 10px #ff6b6b;
+        }
+        #controls {
+            color: #ccddee;
+            text-align: center;
+            margin-top: 10px;
+            font-size: 0.9rem;
+            background: #0f1a2f;
+            padding: 10px;
+            border-radius: 40px;
+        }
+        #resetBtn {
+            background: #ff6b6b;
+            border: none;
+            color: white;
+            padding: 8px 30px;
+            border-radius: 40px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            margin-top: 8px;
+            font-weight: bold;
+            box-shadow: 0 5px 0 #a03a3a;
+            transition: 0.1s;
+        }
+        #resetBtn:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
         #menuOverlay {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.8);
+            background: rgba(0,0,0,0.85);
             display: flex;
             justify-content: center;
             align-items: center;
@@ -88,6 +135,11 @@
             cursor: pointer;
             width: 200px;
             font-weight: bold;
+            transition: 0.2s;
+        }
+        .menuBox button:hover {
+            transform: scale(1.05);
+            background: #3a86ff;
         }
         .menuBox input {
             padding: 10px;
@@ -103,7 +155,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.9);
+            background: rgba(0,0,0,0.95);
             display: none;
             justify-content: center;
             align-items: center;
@@ -139,7 +191,7 @@
         }
         #timerBar {
             position: absolute;
-            top: 80px;
+            top: 90px;
             left: 50%;
             transform: translateX(-50%);
             width: 200px;
@@ -153,10 +205,11 @@
             height: 100%;
             background: #ffd966;
             width: 100%;
+            transition: width 0.1s linear;
         }
         #coinDisplay {
             position: absolute;
-            top: 80px;
+            top: 90px;
             right: 30px;
             color: gold;
             font-size: 1.5rem;
@@ -164,7 +217,7 @@
         }
         #onlineStatus {
             position: absolute;
-            top: 80px;
+            top: 90px;
             left: 30px;
             color: #4d9fff;
             font-size: 1.2rem;
@@ -174,7 +227,7 @@
 </head>
 <body>
     <div id="gameContainer" style="position: relative;">
-        <h1>⚡ ROCKED-EGE ONLINE ⚡</h1>
+        <h1>⚡ ROCKED-EGE ⚡</h1>
         <div class="subtitle">MIT SHOP • TIMER • ONLINE-MULTIPLAYER</div>
         <div id="scoreboard">
             <span class="blue" id="scoreBlue">0</span> : <span class="red" id="scoreRed">0</span>
@@ -183,6 +236,8 @@
         <div id="timerBar"><div id="timerFill"></div></div>
         <div id="coinDisplay">🪙 <span id="coins">0</span></div>
         <div id="onlineStatus"></div>
+
+        <!-- Menü -->
         <div id="menuOverlay">
             <div class="menuBox">
                 <h2>⚡ ROCKED-EGE ⚡</h2>
@@ -192,11 +247,13 @@
                 <div style="margin-top:20px; color:#aaa;">Münzen: <span id="menuCoins">0</span></div>
             </div>
         </div>
+
+        <!-- Shop -->
         <div id="shopOverlay">
             <div class="shopBox">
                 <h2>🛒 SHOP</h2>
                 <div id="shopItems"></div>
-                <button id="closeShopBtn" style="background:#ff6b6b;">SCHLIESSEN</button>
+                <button id="closeShopBtn" style="background:#ff6b6b; margin-top:20px;">SCHLIESSEN</button>
             </div>
         </div>
     </div>
@@ -294,6 +351,12 @@
             highlight: '#fff9c4'
         };
 
+        // ---------- Boost-Energie ----------
+        let boostEnergy = 100;
+        const MAX_BOOST = 100;
+        const BOOST_DRAIN = 0.5;
+        const BOOST_PICKUP = 50;
+
         // ---------- Boost-Felder ----------
         let boosts = [
             { x: 300, y: 150, active: true, radius: 20, respawnTime: 0 },
@@ -379,9 +442,9 @@
 
         // ---------- Timer starten ----------
         function startTimer() {
+            if (timerInterval) clearInterval(timerInterval);
             gameTime = 150;
             timerFill.style.width = '100%';
-            if (timerInterval) clearInterval(timerInterval);
             timerInterval = setInterval(() => {
                 gameTime -= 0.1;
                 let percent = (gameTime / 150) * 100;
@@ -389,28 +452,41 @@
                 if (gameTime <= 0) {
                     clearInterval(timerInterval);
                     // Spielende: Sieger ermitteln
-                    if (blueScore > redScore) alert('Blau gewinnt!');
-                    else if (redScore > blueScore) alert('Rot gewinnt!');
-                    else alert('Unentschieden!');
+                    let message = '';
+                    if (blueScore > redScore) message = '🎉 Blau gewinnt! +20 Coins';
+                    else if (redScore > blueScore) message = '🎉 Rot gewinnt! +20 Coins';
+                    else message = '🤝 Unentschieden!';
+
+                    // Coins für Teilnahme
+                    coins += 20;
+                    localStorage.setItem('rockedEgeCoins', coins);
+                    document.getElementById('coins').innerText = coins;
+                    document.getElementById('menuCoins').innerText = coins;
+
+                    alert(message);
                     resetGame();
                     menuOverlay.style.display = 'flex';
+                    gameMode = 'menu';
                 }
             }, 100);
         }
 
-        // ---------- Reset ----------
+        // ---------- Reset (für Spielstart und Tor) ----------
         function resetGame() {
             blueScore = 0;
             redScore = 0;
             updateScore();
             resetPositions();
-            if (timerInterval) clearInterval(timerInterval);
+            boostEnergy = MAX_BOOST;
+            boostParticles = [];
+            // Timer wird nicht zurückgesetzt, weil er separat gestartet wird
         }
 
         function resetPositions() {
             blue.x = 400; blue.y = 250; blue.angle = 0; blue.speed = 0; blue.vx = 0; blue.vy = 0; blue.inAir = false; blue.canJump = true;
             enemy.x = 700; enemy.y = 250; enemy.angle = Math.PI; enemy.speed = 0; enemy.vx = 0; enemy.vy = 0; enemy.inAir = false; enemy.canJump = true;
             ball.x = 600; ball.y = 250; ball.vx = 0; ball.vy = 0;
+            // Boosts zurücksetzen? (optional)
         }
 
         function updateScore() {
@@ -436,6 +512,7 @@
                             gameMode = 'online';
                             playerRole = 'blue'; // Host ist blau
                             menuOverlay.style.display = 'none';
+                            resetGame();
                             startTimer();
                         });
                     });
@@ -448,6 +525,7 @@
                         gameMode = 'online';
                         playerRole = 'red'; // Client ist rot
                         menuOverlay.style.display = 'none';
+                        resetGame();
                         startTimer();
                     });
                     conn.on('data', (data) => {
@@ -531,7 +609,7 @@
             }
             if (boostJoystick.active && boostEnergy > 0) {
                 blue.isBoosting = true;
-                boostEnergy = Math.max(0, boostEnergy - 0.5);
+                boostEnergy = Math.max(0, boostEnergy - BOOST_DRAIN);
                 if (Math.random() < 0.3) {
                     boostParticles.push({
                         x: blue.x - Math.cos(blue.angle) * 15,
@@ -693,7 +771,7 @@
                 if (dist < car.width/2 + b.radius) {
                     b.active = false;
                     b.respawnTime = 400;
-                    if (car === blue) boostEnergy = Math.min(100, boostEnergy + 50);
+                    if (car === blue) boostEnergy = Math.min(MAX_BOOST, boostEnergy + BOOST_PICKUP);
                 }
             }
         }
@@ -806,6 +884,21 @@
             } else { explosion.active = false; explosion.wow = false; }
         }
 
+        function drawBoostBar() {
+            ctx.save();
+            ctx.fillStyle = '#333';
+            ctx.fillRect(canvas.width - 220, 20, 200, 20);
+            ctx.fillStyle = '#00ffff';
+            ctx.shadowColor = '#00ffff';
+            ctx.shadowBlur = 10;
+            ctx.fillRect(canvas.width - 220, 20, 200 * (boostEnergy / MAX_BOOST), 20);
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 2;
+            ctx.shadowBlur = 0;
+            ctx.strokeRect(canvas.width - 220, 20, 200, 20);
+            ctx.restore();
+        }
+
         function drawJoysticks() {
             if (driveJoystick.active) {
                 ctx.save();
@@ -847,14 +940,11 @@
                 checkGoal();
                 updateBoosts();
             } else if (gameMode === 'online') {
-                // Nur eigenes Auto steuern
                 updatePlayerLocal();
                 updateBall();
                 handleBallCollision(blue, ball);
-                // Ball und Gegner werden über Netzwerk empfangen
                 checkGoal();
                 updateBoosts();
-                // Sende Zustand 30x pro Sekunde
                 if (performance.now() - lastSentTime > 33) {
                     sendState();
                     lastSentTime = performance.now();
@@ -866,12 +956,13 @@
             drawCar(blue, false);
             drawCar(enemy, true);
             drawBoostFire();
+            drawBoostBar();
             drawExplosion();
             drawJoysticks();
             requestAnimationFrame(gameLoop);
         }
 
-        // ---------- Touch-Listener (wie vorher) ----------
+        // ---------- Touch-Listener ----------
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
             const touches = e.touches;
@@ -945,6 +1036,22 @@
                     }
                 }
             }
+            let leftFinger = false, rightFinger = false;
+            for (let i=0;i<e.touches.length;i++) {
+                const touch = e.touches[i];
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width/rect.width, scaleY = canvas.height/rect.height;
+                const canvasX = (touch.clientX - rect.left)*scaleX;
+                if (canvasX < canvas.width/2) leftFinger = true;
+                else rightFinger = true;
+            }
+            if (!leftFinger) { driveJoystick.active = false; driveJoystick.vectorX = 0; driveJoystick.vectorY = 0; }
+            if (!rightFinger) { boostJoystick.active = false; }
+        });
+
+        canvas.addEventListener('touchcancel', (e) => {
+            driveJoystick.active = false; driveJoystick.vectorX = 0; driveJoystick.vectorY = 0;
+            boostJoystick.active = false;
         });
 
         // ---------- Tastatur ----------
@@ -970,8 +1077,8 @@
         playLocalBtn.addEventListener('click', () => {
             gameMode = 'local';
             menuOverlay.style.display = 'none';
-            resetGame();
-            startTimer();
+            resetGame();            // Setzt Punkte und Positionen zurück
+            startTimer();           // Startet den Timer
         });
 
         playOnlineBtn.addEventListener('click', () => {
