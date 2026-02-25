@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Rocked-Ege ULTIMATE</title>
+    <title>Rocked-Ege PRÄZISE</title>
     <style>
         * {
             margin: 0;
@@ -101,8 +101,8 @@
 </head>
 <body>
     <div id="gameContainer">
-        <h1>⚡ ROCKED-EGE ULTIMATE ⚡</h1>
-        <div class="subtitle">LINKER JOYSTICK = FAHREN • RECHTER JOYSTICK = BOOST (verbraucht Energie)</div>
+        <h1>⚡ ROCKED-EGE ⚡</h1>
+        <div class="subtitle">PRÄZISIONS-UPDATE • JOYSTICK JETZT GENAU • BALL KONTROLLIERBAR</div>
         <div id="scoreboard">
             <span class="blue" id="scoreBlue">0</span> : <span class="red" id="scoreRed">0</span>
         </div>
@@ -118,39 +118,38 @@
     </div>
 
     <script>
-        // ---------- Canvas & Kontext ----------
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
         canvas.width = 900;
         canvas.height = 500;
 
-        // ---------- Spielfeld ----------
+        // Spielfeld
         const FIELD_WIDTH = 1200;
         const FIELD_HEIGHT = 700;
         const GOAL_WIDTH = 50;
-        const GOAL_HEIGHT = 160; // Höher für realistischere Tore
+        const GOAL_HEIGHT = 160;
         const WALL_SIZE = 40;
 
-        // ---------- Punktestand ----------
+        // Punktestand
         let blueScore = 0;
         let redScore = 0;
         const scoreBlueEl = document.getElementById('scoreBlue');
         const scoreRedEl = document.getElementById('scoreRed');
 
-        // ---------- Boost-Energie für Spieler ----------
+        // Boost-Energie
         let boostEnergy = 100;
         const MAX_BOOST = 100;
-        const BOOST_DRAIN = 0.5; // pro Frame bei aktivem Boost
-        const BOOST_PICKUP = 50;  // Energie pro eingesammeltem Feld
+        const BOOST_DRAIN = 0.5;
+        const BOOST_PICKUP = 50;
 
-        // ---------- Spieler Blau ----------
+        // Spieler Blau
         const blue = {
             x: 400, y: 250,
             angle: 0,
             speed: 0,
-            maxSpeed: 2.8,
-            accel: 0.15,
-            turnSpeed: 0.04,
+            maxSpeed: 2.5,          // Noch langsamer für bessere Kontrolle
+            accel: 0.12,
+            turnSpeed: 0.06,         // Etwas höher für direktere Lenkung
             width: 30,
             height: 18,
             isBoosting: false,
@@ -161,14 +160,14 @@
             lightColor: '#a2d2ff'
         };
 
-        // ---------- Gegner Rot ----------
+        // Gegner Rot
         const enemy = {
             x: 700, y: 250,
             angle: Math.PI,
             speed: 0,
-            maxSpeed: 2.6,
-            accel: 0.13,
-            turnSpeed: 0.035,
+            maxSpeed: 2.3,
+            accel: 0.11,
+            turnSpeed: 0.05,
             width: 30,
             height: 18,
             isBoosting: false,
@@ -179,17 +178,17 @@
             lightColor: '#ffb3c6'
         };
 
-        // ---------- Ball ----------
+        // Ball
         const ball = {
             x: 600, y: 250,
             radius: 15,
             vx: 0, vy: 0,
-            friction: 0.985,
+            friction: 0.98,           // Etwas höhere Reibung für weniger Gleiten
             color: '#f9e75c',
             highlight: '#fff9c4'
         };
 
-        // ---------- Boost-Felder ----------
+        // Boost-Felder
         const boosts = [
             { x: 300, y: 150, active: true, radius: 20, respawnTime: 0 },
             { x: 900, y: 350, active: true, radius: 20, respawnTime: 0 },
@@ -198,20 +197,20 @@
             { x: 1000, y: 100, active: true, radius: 20, respawnTime: 0 }
         ];
 
-        // ---------- Explosionseffekt ----------
+        // Explosion
         let explosion = {
             active: false,
             x: 0, y: 0,
             timer: 0
         };
 
-        // ---------- Tastatur ----------
+        // Tastatur
         const keys = {
             w: false, a: false, s: false, d: false,
             space: false
         };
 
-        // ---------- Joystick für Fahren (links) ----------
+        // Joystick für Fahren (links)
         let driveJoystick = {
             active: false,
             startX: 0, startY: 0,
@@ -222,13 +221,13 @@
             potentialTap: false
         };
 
-        // ---------- Joystick für Boost (rechts) ----------
+        // Joystick für Boost (rechts)
         let boostJoystick = {
             active: false,
             touchId: null,
         };
 
-        // ---------- Tastatur-Listener ----------
+        // Tastatur-Listener
         window.addEventListener('keydown', (e) => {
             const key = e.key;
             if (["w", "a", "s", "d", "W", "A", "S", "D", " "].includes(key)) {
@@ -253,7 +252,7 @@
             if (key === ' ') keys.space = false;
         });
 
-        // ---------- Touch-Handling ----------
+        // Touch-Handling
         canvas.addEventListener('touchstart', (e) => {
             e.preventDefault();
             const touches = e.touches;
@@ -284,7 +283,6 @@
                     if (!boostJoystick.active) {
                         boostJoystick.active = true;
                         boostJoystick.touchId = touch.identifier;
-                        // Boost wird erst aktiv, wenn Energie vorhanden
                     }
                 }
             }
@@ -306,7 +304,7 @@
                     driveJoystick.currentY = canvasY;
                     let dx = driveJoystick.currentX - driveJoystick.startX;
                     let dy = driveJoystick.currentY - driveJoystick.startY;
-                    const maxDist = 50;
+                    const maxDist = 40; // Kleinerer Radius = feinere Steuerung
                     let dist = Math.sqrt(dx*dx + dy*dy);
                     if (dist > maxDist) {
                         dx = (dx / dist) * maxDist;
@@ -314,14 +312,15 @@
                         driveJoystick.currentX = driveJoystick.startX + dx;
                         driveJoystick.currentY = driveJoystick.startY + dy;
                     }
-                    if (dist < 10) {
+                    // Totzone von 15 Pixeln – Finger muss deutlich bewegt werden
+                    if (dist < 15) {
                         driveJoystick.vectorX = 0;
                         driveJoystick.vectorY = 0;
                     } else {
                         driveJoystick.vectorX = dx / maxDist;
                         driveJoystick.vectorY = dy / maxDist;
                     }
-                    if (dist > 10) {
+                    if (dist > 15) {
                         driveJoystick.potentialTap = false;
                         if (driveJoystick.tapTimer) {
                             clearTimeout(driveJoystick.tapTimer);
@@ -342,9 +341,9 @@
                             if (!blue.inAir && blue.canJump) {
                                 blue.inAir = true;
                                 blue.canJump = false;
-                                blue.vx = Math.cos(blue.angle) * 5;
-                                blue.vy = Math.sin(blue.angle) * 5;
-                                blue.vy -= 2.2;
+                                blue.vx = Math.cos(blue.angle) * 4;
+                                blue.vy = Math.sin(blue.angle) * 4;
+                                blue.vy -= 2;
                             }
                         }
                         driveJoystick.active = false;
@@ -388,7 +387,7 @@
             boostJoystick.active = false;
         });
 
-        // ---------- Reset ----------
+        // Reset
         document.getElementById('resetBtn').addEventListener('click', () => {
             blueScore = 0;
             redScore = 0;
@@ -408,9 +407,9 @@
             scoreRedEl.textContent = redScore;
         }
 
-        // ---------- Gegner-KI (verbessert) ----------
+        // Gegner-KI
         function updateEnemy() {
-            const targetX = 40; // Linkes Tor
+            const targetX = 40;
             const targetY = FIELD_HEIGHT/2;
 
             if (enemy.inAir) {
@@ -429,7 +428,6 @@
 
                 let targetAngle;
                 if (distToBall < 120) {
-                    // Zum Tor zielen
                     let dxTarget = targetX - ball.x;
                     let dyTarget = targetY - ball.y;
                     targetAngle = Math.atan2(dyTarget, dxTarget);
@@ -451,13 +449,12 @@
                 if (distToBall < 70 && enemy.canJump && !enemy.inAir) {
                     enemy.inAir = true;
                     enemy.canJump = false;
-                    enemy.vx = Math.cos(enemy.angle) * 5.5;
-                    enemy.vy = Math.sin(enemy.angle) * 5.5;
+                    enemy.vx = Math.cos(enemy.angle) * 5;
+                    enemy.vy = Math.sin(enemy.angle) * 5;
                     enemy.vy -= 2;
                 }
             }
 
-            // Gegner kann auch boosten (z.B. wenn er weit weg ist)
             if (Math.hypot(ball.x - enemy.x, ball.y - enemy.y) > 300 && !enemy.isBoosting && Math.random() < 0.01) {
                 enemy.isBoosting = true;
                 enemy.boostEndTime = 60;
@@ -466,13 +463,13 @@
                 enemy.boostEndTime--;
                 if (enemy.boostEndTime <= 0) enemy.isBoosting = false;
             }
-            enemy.maxSpeed = enemy.isBoosting ? 4 : 2.6;
+            enemy.maxSpeed = enemy.isBoosting ? 3.5 : 2.3;
 
             enemy.x = Math.max(WALL_SIZE + enemy.width/2, Math.min(FIELD_WIDTH - WALL_SIZE - enemy.width/2, enemy.x));
             enemy.y = Math.max(WALL_SIZE + enemy.height/2, Math.min(FIELD_HEIGHT - WALL_SIZE - enemy.height/2, enemy.y));
         }
 
-        // ---------- Spieler Blau ----------
+        // Spieler Blau
         function updatePlayer() {
             let moveX = 0, moveY = 0;
 
@@ -515,12 +512,12 @@
             if (keys.space && !blue.inAir && blue.canJump) {
                 blue.inAir = true;
                 blue.canJump = false;
-                blue.vx = Math.cos(blue.angle) * 5;
-                blue.vy = Math.sin(blue.angle) * 5;
-                blue.vy -= 2.2;
+                blue.vx = Math.cos(blue.angle) * 4;
+                blue.vy = Math.sin(blue.angle) * 4;
+                blue.vy -= 2;
             }
 
-            // Boost-Logik mit Energie
+            // Boost mit Energie
             if (boostJoystick.active && boostEnergy > 0) {
                 blue.isBoosting = true;
                 boostEnergy = Math.max(0, boostEnergy - BOOST_DRAIN);
@@ -528,11 +525,7 @@
                 blue.isBoosting = false;
             }
 
-            if (blue.isBoosting) {
-                blue.maxSpeed = 4.5;
-            } else {
-                blue.maxSpeed = 2.8;
-            }
+            blue.maxSpeed = blue.isBoosting ? 4 : 2.5;
 
             blue.x = Math.max(WALL_SIZE + blue.width/2, Math.min(FIELD_WIDTH - WALL_SIZE - blue.width/2, blue.x));
             blue.y = Math.max(WALL_SIZE + blue.height/2, Math.min(FIELD_HEIGHT - WALL_SIZE - blue.height/2, blue.y));
@@ -540,35 +533,37 @@
             collectBoosts(blue);
         }
 
-        // ---------- Ballphysik ----------
+        // Ballphysik mit verbesserter Kollision
         function updateBall() {
             ball.x += ball.vx;
             ball.y += ball.vy;
             ball.vx *= ball.friction;
             ball.vy *= ball.friction;
 
+            // Geschwindigkeit begrenzen
+            const maxBallSpeed = 12;
+            if (Math.abs(ball.vx) > maxBallSpeed) ball.vx = Math.sign(ball.vx) * maxBallSpeed;
+            if (Math.abs(ball.vy) > maxBallSpeed) ball.vy = Math.sign(ball.vy) * maxBallSpeed;
+
             if (ball.x - ball.radius < WALL_SIZE) {
                 ball.x = WALL_SIZE + ball.radius;
-                ball.vx *= -0.7;
+                ball.vx *= -0.6;
             }
             if (ball.x + ball.radius > FIELD_WIDTH - WALL_SIZE) {
                 ball.x = FIELD_WIDTH - WALL_SIZE - ball.radius;
-                ball.vx *= -0.7;
+                ball.vx *= -0.6;
             }
             if (ball.y - ball.radius < WALL_SIZE) {
                 ball.y = WALL_SIZE + ball.radius;
-                ball.vy *= -0.7;
+                ball.vy *= -0.6;
             }
             if (ball.y + ball.radius > FIELD_HEIGHT - WALL_SIZE) {
                 ball.y = FIELD_HEIGHT - WALL_SIZE - ball.radius;
-                ball.vy *= -0.7;
+                ball.vy *= -0.6;
             }
-
-            if (Math.abs(ball.vx) > 15) ball.vx *= 0.95;
-            if (Math.abs(ball.vy) > 15) ball.vy *= 0.95;
         }
 
-        // ---------- Kollisionen ----------
+        // Kollision Auto-Ball mit reduzierter Kraft
         function handleBallCollision(car, ball) {
             let dx = ball.x - car.x;
             let dy = ball.y - car.y;
@@ -576,11 +571,23 @@
             let minDist = car.width/2 + ball.radius;
 
             if (dist < minDist) {
-                let angle = car.angle;
-                let power = 4 + Math.abs(car.speed) * 1.8;
-                ball.vx += Math.cos(angle) * power;
-                ball.vy += Math.sin(angle) * power;
+                // Berechne Winkel zwischen Autofront und Ball
+                let carFrontAngle = car.angle;
+                let ballAngle = Math.atan2(dy, dx);
+                let angleDiff = Math.abs(ballAngle - carFrontAngle);
+                // Normalisieren
+                while (angleDiff > Math.PI) angleDiff -= 2*Math.PI;
+                let factor = Math.cos(angleDiff); // 1 = volle Kraft, 0 = seitlich
+                factor = Math.max(0.3, factor); // Mindestfaktor
 
+                // Impulsstärke
+                let power = 3 + Math.abs(car.speed) * 1.2;
+                power *= factor;
+
+                ball.vx += Math.cos(car.angle) * power;
+                ball.vy += Math.sin(car.angle) * power;
+
+                // Verhindere Überschießen
                 let overlap = minDist - dist;
                 let pushX = dx / dist * overlap * 0.5;
                 let pushY = dy / dist * overlap * 0.5;
@@ -591,6 +598,7 @@
             }
         }
 
+        // Kollision Auto-Auto
         function handleCarCollision(car1, car2) {
             let dx = car2.x - car1.x;
             let dy = car2.y - car1.y;
@@ -606,13 +614,13 @@
                 car2.x += pushX;
                 car2.y += pushY;
 
-                let vRel = (car1.speed - car2.speed) * 0.3;
+                let vRel = (car1.speed - car2.speed) * 0.2;
                 car1.speed += vRel;
                 car2.speed -= vRel;
             }
         }
 
-        // ---------- Tor mit Explosion ----------
+        // Tor mit Explosion
         function checkGoal() {
             if (ball.x - ball.radius < GOAL_WIDTH && 
                 ball.y > (FIELD_HEIGHT/2 - GOAL_HEIGHT/2) && 
@@ -640,7 +648,7 @@
             }
         }
 
-        // ---------- Boost-Felder ----------
+        // Boost-Felder
         function collectBoosts(car) {
             for (let b of boosts) {
                 if (!b.active) continue;
@@ -653,7 +661,6 @@
                     if (car === blue) {
                         boostEnergy = Math.min(MAX_BOOST, boostEnergy + BOOST_PICKUP);
                     } else {
-                        // Gegner bekommt unendlich, aber wir geben ihm trotzdem einen Boost
                         enemy.isBoosting = true;
                         enemy.boostEndTime = 60;
                     }
@@ -672,22 +679,17 @@
             }
         }
 
-        // ---------- Zeichnen ----------
+        // Zeichenfunktionen (wie gehabt, aber gekürzt)
         function drawField3D() {
-            // Rasen
             const gradient = ctx.createLinearGradient(0, 0, 0, canvas.height);
             gradient.addColorStop(0, '#1a4d1a');
             gradient.addColorStop(0.5, '#2d6a2d');
             gradient.addColorStop(1, '#1f4f1f');
             ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Wände
             ctx.strokeStyle = '#8b5a2b';
             ctx.lineWidth = 8;
             ctx.strokeRect(5, 5, canvas.width-10, canvas.height-10);
-
-            // Mittellinie
             ctx.strokeStyle = '#ffffff';
             ctx.lineWidth = 2;
             ctx.setLineDash([10, 15]);
@@ -696,24 +698,19 @@
             ctx.lineTo(canvas.width/2, canvas.height);
             ctx.stroke();
             ctx.setLineDash([]);
-
-            // Mittelkreis
             ctx.beginPath();
             ctx.ellipse(canvas.width/2, canvas.height/2, 60, 30, 0, 0, 2*Math.PI);
             ctx.strokeStyle = 'rgba(255,255,255,0.4)';
             ctx.stroke();
 
-            // Realistische Tore
+            // Tore
             ctx.save();
-            // Linkes Tor
             ctx.fillStyle = '#8b5a2b';
             ctx.shadowColor = '#5a3a1b';
             ctx.shadowBlur = 10;
-            // Pfosten
             ctx.fillRect(0, canvas.height/2-80, 8, 160);
             ctx.fillRect(0, canvas.height/2-80, 60, 8);
             ctx.fillRect(0, canvas.height/2+72, 60, 8);
-            // Netz (gestrichelt)
             ctx.strokeStyle = '#c0c0c0';
             ctx.lineWidth = 1;
             ctx.setLineDash([3, 5]);
@@ -731,7 +728,6 @@
                 ctx.lineTo(x, canvas.height/2+70);
                 ctx.stroke();
             }
-            // Rechtes Tor
             ctx.fillRect(canvas.width-8, canvas.height/2-80, 8, 160);
             ctx.fillRect(canvas.width-60, canvas.height/2-80, 60, 8);
             ctx.fillRect(canvas.width-60, canvas.height/2+72, 60, 8);
@@ -756,14 +752,10 @@
             ctx.save();
             ctx.translate(car.x, car.y);
             ctx.rotate(car.angle);
-
-            // Schatten
             ctx.fillStyle = 'rgba(0,0,0,0.3)';
             ctx.beginPath();
             ctx.ellipse(0, 5, car.width/1.8, car.height/3, 0, 0, 2*Math.PI);
             ctx.fill();
-
-            // Karosserie (mit spitzer Front)
             ctx.fillStyle = car.color;
             ctx.shadowColor = car.color;
             ctx.shadowBlur = 15;
@@ -775,21 +767,15 @@
             ctx.lineTo(-car.width/2, car.height/2);
             ctx.closePath();
             ctx.fill();
-
-            // Dach
             ctx.fillStyle = car.lightColor;
             ctx.beginPath();
             ctx.rect(-car.width/3, -car.height/2 - 4, car.width/1.8, 6);
             ctx.fill();
-
-            // Fenster
             ctx.fillStyle = '#2b3a67';
             ctx.shadowBlur = 0;
             ctx.beginPath();
             ctx.rect(-car.width/4, -car.height/2 - 2, car.width/2, 4);
             ctx.fill();
-
-            // Räder
             ctx.fillStyle = '#222';
             ctx.shadowBlur = 5;
             ctx.shadowColor = '#000';
@@ -805,8 +791,6 @@
             ctx.beginPath();
             ctx.ellipse(car.width/3, car.height/2.5, 5, 7, 0, 0, 2*Math.PI);
             ctx.fill();
-
-            // Scheinwerfer (vorne)
             ctx.fillStyle = '#ffffaa';
             ctx.shadowColor = '#ffff00';
             ctx.shadowBlur = 10;
@@ -816,8 +800,6 @@
             ctx.beginPath();
             ctx.arc(car.width/2 - 2, 3, 4, 0, 2*Math.PI);
             ctx.fill();
-
-            // Rücklichter (hinten)
             ctx.fillStyle = '#ff4444';
             ctx.shadowColor = '#ff0000';
             ctx.shadowBlur = 8;
@@ -827,21 +809,16 @@
             ctx.beginPath();
             ctx.arc(-car.width/2 + 2, 3, 3, 0, 2*Math.PI);
             ctx.fill();
-
             ctx.restore();
         }
 
         function drawBall3D() {
             ctx.save();
             ctx.translate(ball.x, ball.y);
-
-            // Schatten
             ctx.fillStyle = 'rgba(0,0,0,0.3)';
             ctx.beginPath();
             ctx.ellipse(0, 5, ball.radius, ball.radius/2, 0, 0, 2*Math.PI);
             ctx.fill();
-
-            // Ball mit Panels (wie Fußball)
             const gradient = ctx.createRadialGradient(-3, -3, 2, 0, 0, ball.radius);
             gradient.addColorStop(0, ball.highlight);
             gradient.addColorStop(0.8, ball.color);
@@ -851,8 +828,6 @@
             ctx.beginPath();
             ctx.arc(0, 0, ball.radius, 0, 2*Math.PI);
             ctx.fill();
-
-            // Fünfeck-Muster (einfach)
             ctx.strokeStyle = '#333';
             ctx.lineWidth = 1;
             ctx.shadowBlur = 0;
@@ -863,14 +838,11 @@
                 ctx.lineTo(Math.cos(angle) * ball.radius, Math.sin(angle) * ball.radius);
                 ctx.stroke();
             }
-
-            // Glanzpunkt
             ctx.fillStyle = '#ffffff';
             ctx.shadowBlur = 5;
             ctx.beginPath();
             ctx.arc(-4, -4, 3, 0, 2*Math.PI);
             ctx.fill();
-
             ctx.restore();
         }
 
@@ -879,14 +851,12 @@
                 if (b.active) {
                     ctx.save();
                     ctx.translate(b.x, b.y);
-                    // Leuchtender Kreis
                     ctx.fillStyle = '#00ffff';
                     ctx.shadowColor = '#00ffff';
                     ctx.shadowBlur = 20;
                     ctx.beginPath();
                     ctx.arc(0, 0, b.radius, 0, 2*Math.PI);
                     ctx.fill();
-                    // Innerer Kreis
                     ctx.fillStyle = '#ffffff';
                     ctx.shadowBlur = 10;
                     ctx.beginPath();
@@ -899,20 +869,16 @@
 
         function drawBoostBar() {
             ctx.save();
-            // Hintergrund
             ctx.fillStyle = '#333';
             ctx.fillRect(canvas.width - 220, 20, 200, 30);
-            // Boost-Füllung
             ctx.fillStyle = '#00ffff';
             ctx.shadowColor = '#00ffff';
             ctx.shadowBlur = 10;
             ctx.fillRect(canvas.width - 220, 20, 200 * (boostEnergy / MAX_BOOST), 30);
-            // Rahmen
             ctx.strokeStyle = '#fff';
             ctx.lineWidth = 2;
             ctx.shadowBlur = 0;
             ctx.strokeRect(canvas.width - 220, 20, 200, 30);
-            // Text
             ctx.fillStyle = '#fff';
             ctx.font = 'bold 16px Arial';
             ctx.fillText('BOOST', canvas.width - 210, 45);
