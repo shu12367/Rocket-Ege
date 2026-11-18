@@ -7,46 +7,119 @@
 <style>
   * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
   html, body { width:100%; height:100%; overflow:hidden; background:#0b0d13;
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color:#fff; user-select:none; -webkit-user-select:none; }
   #game { display:block; width:100%; height:100%; touch-action:none; }
 
-  #hud {
-    position:fixed; top:0; left:0; right:0; padding:18px 22px;
-    display:flex; justify-content:space-between; align-items:flex-start;
-    pointer-events:none; color:#fff; text-shadow:0 2px 12px rgba(0,0,0,.7);
-  }
-  #score { font-size:44px; font-weight:800; letter-spacing:1px; line-height:1; }
-  #score small { display:block; font-size:12px; font-weight:600; opacity:.6;
-    letter-spacing:3px; margin-top:4px; }
-  #best { font-size:15px; font-weight:700; opacity:.75; text-align:right; }
-  #best span { display:block; font-size:26px; opacity:1; }
+  /* HUD */
+  #hud { position:fixed; top:0; left:0; right:0; padding:16px 20px;
+    display:none; justify-content:space-between; align-items:flex-start;
+    pointer-events:none; text-shadow:0 2px 12px rgba(0,0,0,.85); }
+  #hud .stat { text-align:center; }
+  #hud .stat .val { font-size:32px; font-weight:800; line-height:1; }
+  #hud .stat .lbl { font-size:10px; font-weight:600; opacity:.65; letter-spacing:2px; margin-top:4px; }
+  #hud .stat.mid .val { font-size:26px; color:#ffc93c; }
 
-  #overlay {
+  /* Screens */
+  .screen {
     position:fixed; inset:0; display:flex; flex-direction:column;
-    align-items:center; justify-content:center; gap:14px;
-    background:radial-gradient(circle at 50% 40%, rgba(20,30,70,.82), rgba(5,7,14,.96));
-    backdrop-filter: blur(6px); color:#fff; text-align:center; padding:24px;
-    transition:opacity .25s; z-index:10;
+    align-items:center; justify-content:center; gap:16px;
+    padding:24px; z-index:10;
+    background:radial-gradient(circle at 50% 40%, rgba(20,30,70,.85), rgba(5,7,14,.97));
+    backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
+    overflow-y:auto;
   }
-  #overlay.hidden { opacity:0; pointer-events:none; }
-  #overlay h1 { font-size:clamp(26px,6vw,44px); font-weight:900; letter-spacing:2px;
-    background:linear-gradient(180deg,#fff,#8fa8ff); -webkit-background-clip:text;
-    background-clip:text; color:transparent; }
-  #overlay p { font-size:15px; line-height:1.7; opacity:.8; max-width:430px; }
-  #overlay kbd {
-    background:rgba(255,255,255,.12); border:1px solid rgba(255,255,255,.2);
-    border-radius:6px; padding:1px 7px; font-family:inherit; font-size:13px; font-weight:700;
-  }
-  #finalScore { font-size:16px; opacity:.85; font-weight:700; }
-  #finalScore b { font-size:34px; display:block; color:#ffc93c; }
-  #startBtn {
-    margin-top:8px; padding:15px 48px; font-size:17px; font-weight:800; letter-spacing:2px;
+  .screen.hidden { display:none; }
+  .screen h1 { font-size:clamp(28px,7vw,48px); font-weight:900; letter-spacing:3px;
+    background:linear-gradient(180deg,#fff,#8fa8ff);
+    -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .screen h2 { font-size:clamp(22px,5vw,32px); font-weight:800; letter-spacing:2px;
+    margin-bottom:8px; }
+  .screen p { font-size:14px; line-height:1.7; opacity:.85; max-width:440px;
+    text-align:center; }
+
+  .btnMain {
+    padding:15px 48px; font-size:17px; font-weight:800; letter-spacing:2px;
     border:none; border-radius:100px; cursor:pointer; color:#0b0d13;
     background:linear-gradient(180deg,#8fe3ff,#4a9dff);
-    box-shadow:0 10px 30px rgba(74,157,255,.45), inset 0 -3px 0 rgba(0,0,0,.18);
+    box-shadow:0 8px 24px rgba(74,157,255,.4);
     transition:transform .12s;
   }
-  #startBtn:active { transform:scale(.95); }
+  .btnMain:active { transform:scale(.96); }
+  .btnMain.secondary {
+    background:linear-gradient(180deg,#ffd060,#ff9500);
+    box-shadow:0 8px 24px rgba(255,149,0,.4);
+  }
+  .btnMain.tertiary {
+    background:linear-gradient(180deg,#c0a0ff,#8040ff); color:#fff;
+    box-shadow:0 8px 24px rgba(128,64,255,.4);
+  }
+  .btnBack {
+    padding:10px 28px; font-size:13px; font-weight:700; letter-spacing:2px;
+    background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15);
+    border-radius:100px; color:#fff; cursor:pointer; transition:background .15s;
+  }
+  .btnBack:hover { background:rgba(255,255,255,.16); }
+
+  .menuBtns { display:flex; flex-direction:column; gap:12px; margin-top:16px; }
+
+  #worldGrid, #skinGrid {
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));
+    gap:12px; max-width:760px; width:100%; padding:8px;
+  }
+  .worldCard {
+    position:relative; background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:14px; padding:16px 12px 14px; cursor:pointer;
+    transition:all .15s; overflow:hidden;
+  }
+  .worldCard:hover { transform:translateY(-3px); background:rgba(255,255,255,.1); }
+  .worldCard.locked { opacity:.4; cursor:not-allowed; }
+  .worldCard.locked:hover { transform:none; }
+  .worldBand { position:absolute; top:0; left:0; right:0; height:4px; }
+  .worldNum { font-size:11px; font-weight:700; opacity:.6; letter-spacing:1px; }
+  .worldName { font-size:15px; font-weight:800; margin:4px 0 6px; }
+  .worldInfo { font-size:11px; opacity:.7; }
+
+  .skinCard {
+    background:rgba(255,255,255,.05);
+    border:1px solid rgba(255,255,255,.1);
+    border-radius:14px; padding:14px 12px;
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    transition:all .15s;
+  }
+  .skinCard.equipped {
+    border-color:#4a9dff; box-shadow:0 0 0 2px rgba(74,157,255,.4);
+  }
+  .skinPreview {
+    width:52px; height:52px; border-radius:50%;
+    box-shadow:inset 0 -6px 12px rgba(0,0,0,.25);
+  }
+  .skinName { font-size:14px; font-weight:800; }
+  .skinBtn {
+    width:100%; padding:8px 4px; font-size:12px; font-weight:700;
+    border:none; border-radius:8px; cursor:pointer;
+    background:linear-gradient(180deg,#4a9dff,#2070d0); color:#fff;
+    letter-spacing:1px;
+  }
+  .skinBtn:disabled {
+    background:rgba(255,255,255,.1); color:rgba(255,255,255,.5); cursor:default;
+  }
+  .clipsInfo { font-size:16px; font-weight:700; }
+  .clipsInfo span { color:#ffc93c; }
+
+  .infoBox {
+    background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);
+    border-radius:14px; padding:20px 36px; text-align:center; min-width:220px;
+  }
+  .infoBox .lbl { font-size:11px; opacity:.6; letter-spacing:2px; }
+  .infoBox .big { font-size:46px; font-weight:900; color:#ffc93c; line-height:1.1; }
+  .infoBox .sub { font-size:14px; opacity:.75; margin-top:4px; }
+
+  /* HUD icons */
+  .coinIcon { display:inline-block; width:14px; height:14px; border-radius:50%;
+    background: radial-gradient(circle at 35% 35%, #ffe680, #ffc93c 60%, #b8860b);
+    box-shadow: 0 0 0 1px #b8860b inset; vertical-align:middle; margin-right:3px; }
 </style>
 </head>
 <body>
@@ -54,18 +127,67 @@
 <canvas id="game"></canvas>
 
 <div id="hud">
-  <div id="score">0<small>PUNKTE</small></div>
-  <div id="best">BEST<span id="bestVal">0</span></div>
+  <div class="stat">
+    <div class="val" id="scoreVal">0</div>
+    <div class="lbl">PUNKTE</div>
+  </div>
+  <div class="stat mid">
+    <div class="val" id="clipVal">0</div>
+    <div class="lbl">CLIPS</div>
+  </div>
+  <div class="stat">
+    <div class="val" id="bestVal">0</div>
+    <div class="lbl">BEST</div>
+  </div>
 </div>
 
-<div id="overlay">
+<div id="menuScreen" class="screen">
   <h1>ENDLESS RUNNER</h1>
-  <p>
-    <kbd>←</kbd> <kbd>→</kbd> Spur wechseln &nbsp;·&nbsp; <kbd>↑</kbd> / <kbd>Leertaste</kbd> springen<br>
-    <kbd>↓</kbd> ducken &nbsp;·&nbsp; auf dem Handy: wischen
-  </p>
-  <div id="finalScore" style="display:none">SCORE<b id="finalVal">0</b></div>
-  <button id="startBtn">START</button>
+  <p>Wähle deine Welt, sammle Clips und kaufe Skins.<br>
+     Weiche Hindernissen aus und entkomme deiner Verfolgerin!</p>
+  <div class="menuBtns">
+    <button class="btnMain" id="btnPlay">SPIELEN</button>
+    <button class="btnMain secondary" id="btnShop">SHOP</button>
+  </div>
+</div>
+
+<div id="worldsScreen" class="screen hidden">
+  <h2>WÄHLE EINE WELT</h2>
+  <div id="worldGrid"></div>
+  <button class="btnBack" data-back>ZURÜCK</button>
+</div>
+
+<div id="shopScreen" class="screen hidden">
+  <h2>SKIN SHOP</h2>
+  <div class="clipsInfo">Deine Clips: <span id="shopClips">0</span> <span class="coinIcon"></span></div>
+  <div id="skinGrid"></div>
+  <button class="btnBack" data-back>ZURÜCK</button>
+</div>
+
+<div id="overScreen" class="screen hidden">
+  <h2>GAME OVER</h2>
+  <div class="infoBox">
+    <div class="lbl">PUNKTE</div>
+    <div class="big" id="goScore">0</div>
+    <div class="sub" id="goClips">+0 Clips</div>
+  </div>
+  <div class="menuBtns">
+    <button class="btnMain" id="btnRetry">NOCHMAL</button>
+    <button class="btnBack" data-back>MENÜ</button>
+  </div>
+</div>
+
+<div id="completeScreen" class="screen hidden">
+  <h2>WELT GESCHAFFT!</h2>
+  <div class="infoBox">
+    <div class="lbl">PUNKTE</div>
+    <div class="big" id="wcScore">0</div>
+    <div class="sub" id="wcInfo"></div>
+  </div>
+  <div class="menuBtns">
+    <button class="btnMain tertiary" id="btnNextWorld">NÄCHSTE WELT</button>
+    <button class="btnBack" data-back>MENÜ</button>
+  </div>
 </div>
 
 <script>
@@ -73,20 +195,163 @@
 "use strict";
 
 /* =========================================================
-   GRUND-SETUP
+   KONSTANTEN
+   ========================================================= */
+const LANES     = [-1.7, 0, 1.7];
+const SPAWN_Z   = 140;
+const GRAVITY   = 30;
+const JUMP_V    = 9.2;
+const SLIDE_T   = 0.62;
+const CAM_Z     = -7;
+const CAM_Y     = 2.4;
+const CHASER_Z  = -2.5;
+
+const TYPES = {
+  low:   { y0: 0,    h: 0.78, w: 1.55, depth: 0.8 },  // SPRINGEN
+  high:  { y0: 1.15, h: 1.5,  w: 1.55, depth: 0.8 },  // DUCKEN
+  block: { y0: 0,    h: 2.1,  w: 1.55, depth: 1.4 }   // AUSWEICHEN
+};
+
+/* =========================================================
+   10 WELTEN
+   ========================================================= */
+const WORLDS = [
+  { name:'Neon City', goal: 300,
+    sky:['#0a0f24','#1a2550','#4a5fa8'], ground:['#1e2230','#080a10'],
+    groundLine:'rgba(140,170,255,0.30)', dash:'rgba(200,215,255,0.42)',
+    obstacle:{
+      low:  {front:'#ff5a3c', top:'#ff8f78', side:'#bd3720'},
+      high: {front:'#ffc93c', top:'#ffe38a', side:'#c3961f'},
+      block:{front:'#4a7dff', top:'#8aabff', side:'#2c53b8'}
+    }},
+  { name:'Tokyo', goal: 450,
+    sky:['#1a0a2e','#3d1a5c','#8e4fa8'], ground:['#2a1a30','#0a0510'],
+    groundLine:'rgba(255,100,200,0.35)', dash:'rgba(255,180,240,0.45)',
+    obstacle:{
+      low:  {front:'#e63946', top:'#ff7b7b', side:'#a01f2e'},
+      high: {front:'#ffb703', top:'#ffd470', side:'#c08c00'},
+      block:{front:'#7209b7', top:'#b05de0', side:'#4a0575'}
+    }},
+  { name:'Wüste', goal: 600,
+    sky:['#4a2818','#c47a3a','#f2c68a'], ground:['#d4a870','#6a4820'],
+    groundLine:'rgba(255,220,160,0.35)', dash:'rgba(255,235,180,0.50)',
+    obstacle:{
+      low:  {front:'#d4741a', top:'#ffb060', side:'#a05010'},
+      high: {front:'#8a4a1a', top:'#b07040', side:'#5a2a0a'},
+      block:{front:'#4a8a3a', top:'#7ac060', side:'#2a5a1a'}
+    }},
+  { name:'Schnee', goal: 750,
+    sky:['#5a7aa8','#a8c0e0','#e8f0ff'], ground:['#e0e8f5','#8090a8'],
+    groundLine:'rgba(200,220,255,0.5)', dash:'rgba(255,255,255,0.6)',
+    obstacle:{
+      low:  {front:'#3a6ea5', top:'#5a8ec5', side:'#204a75'},
+      high: {front:'#e63946', top:'#ff7b7b', side:'#a01f2e'},
+      block:{front:'#f0f0f0', top:'#ffffff', side:'#a0a0a0'}
+    }},
+  { name:'Wald', goal: 900,
+    sky:['#2a4a1a','#4a7a2a','#8ab060'], ground:['#3a2a1a','#100810'],
+    groundLine:'rgba(140,220,80,0.35)', dash:'rgba(200,255,120,0.45)',
+    obstacle:{
+      low:  {front:'#8b4513', top:'#b86530', side:'#5a2a08'},
+      high: {front:'#2e7d32', top:'#4caf50', side:'#1a4a1a'},
+      block:{front:'#6d4c41', top:'#8d6e63', side:'#3a2820'}
+    }},
+  { name:'Strand', goal: 1100,
+    sky:['#1a6a9a','#5aaee0','#b8e8ff'], ground:['#f0d880','#a08040'],
+    groundLine:'rgba(255,255,200,0.4)', dash:'rgba(255,250,220,0.55)',
+    obstacle:{
+      low:  {front:'#e8a020', top:'#ffc050', side:'#a07010'},
+      high: {front:'#00a0c0', top:'#40d0f0', side:'#006080'},
+      block:{front:'#e63946', top:'#ff7b7b', side:'#a01f2e'}
+    }},
+  { name:'Vulkan', goal: 1300,
+    sky:['#1a0505','#5a1010','#c03010'], ground:['#2a1010','#0a0505'],
+    groundLine:'rgba(255,80,20,0.4)', dash:'rgba(255,140,60,0.55)',
+    obstacle:{
+      low:  {front:'#ff4500', top:'#ff8060', side:'#a02500'},
+      high: {front:'#ffd700', top:'#fff060', side:'#a09000'},
+      block:{front:'#3a1a1a', top:'#6a3030', side:'#1a0a0a'}
+    }},
+  { name:'Weltraum', goal: 1500,
+    sky:['#050010','#1a0a3a','#3a2a6a'], ground:['#1a1a2a','#050510'],
+    groundLine:'rgba(120,140,255,0.4)', dash:'rgba(180,200,255,0.5)',
+    obstacle:{
+      low:  {front:'#8a20e0', top:'#b060ff', side:'#5a10a0'},
+      high: {front:'#20e0c0', top:'#60ffe0', side:'#10a090'},
+      block:{front:'#404060', top:'#707090', side:'#202030'}
+    }},
+  { name:'Süßes', goal: 1700,
+    sky:['#ffb0d0','#ff80b0','#ffe0f0'], ground:['#ffd0e0','#a05080'],
+    groundLine:'rgba(255,255,255,0.5)', dash:'rgba(255,200,240,0.6)',
+    obstacle:{
+      low:  {front:'#ff4080', top:'#ff80b0', side:'#a02050'},
+      high: {front:'#40c0ff', top:'#80e0ff', side:'#2080a0'},
+      block:{front:'#a040ff', top:'#c080ff', side:'#6010a0'}
+    }},
+  { name:'Cyber', goal: 2000,
+    sky:['#050015','#150040','#300080'], ground:['#0a0a1a','#000005'],
+    groundLine:'rgba(0,255,255,0.5)', dash:'rgba(255,0,255,0.6)',
+    obstacle:{
+      low:  {front:'#00ffff', top:'#80ffff', side:'#0090a0'},
+      high: {front:'#ff00ff', top:'#ff80ff', side:'#a000a0'},
+      block:{front:'#ffff00', top:'#ffff80', side:'#a0a000'}
+    }}
+];
+
+/* =========================================================
+   SKINS
+   ========================================================= */
+const SKINS = [
+  { id:'default', name:'Klassisch', price:0,
+    colors:{shirt:'#ff6b35', shirtLight:'#ff8f5e', pants:'#2b2f45',
+            skin:'#f2c49b', hat:'#e63946', hatLight:'#ff6270', shoe:'#e9ecf5'}},
+  { id:'blue', name:'Blau', price:40,
+    colors:{shirt:'#4a7dff', shirtLight:'#7aa3ff', pants:'#1a2a5a',
+            skin:'#f2c49b', hat:'#1e3a99', hatLight:'#4060d0', shoe:'#e9ecf5'}},
+  { id:'green', name:'Grün', price:80,
+    colors:{shirt:'#4caf50', shirtLight:'#7ed080', pants:'#2a4a2a',
+            skin:'#f2c49b', hat:'#2e7d32', hatLight:'#5aa060', shoe:'#e9ecf5'}},
+  { id:'purple', name:'Lila', price:150,
+    colors:{shirt:'#9c27b0', shirtLight:'#c060d0', pants:'#3a1a4a',
+            skin:'#f2c49b', hat:'#6a1b9a', hatLight:'#a060d0', shoe:'#e9ecf5'}},
+  { id:'gold', name:'Gold', price:250,
+    colors:{shirt:'#ffc93c', shirtLight:'#ffe080', pants:'#8a6a10',
+            skin:'#f2c49b', hat:'#b8860b', hatLight:'#ffd700', shoe:'#fff8e0'}},
+  { id:'rainbow', name:'Regenbogen', price:500,
+    colors:{shirt:'#ff6b9d', shirtLight:'#ffb0d0', pants:'#4a2a8a',
+            skin:'#f2c49b', hat:'#00bcd4', hatLight:'#80ffff', shoe:'#ffffff'}}
+];
+
+/* =========================================================
+   SAVE
+   ========================================================= */
+const SAVE_KEY = 'runner_save_v2';
+function defaultSave(){
+  return {
+    bestScore:0, clips:0, unlockedWorld:1,
+    ownedSkins:['default'], selectedSkin:'default', worldBest:{}
+  };
+}
+function loadSave(){
+  try {
+    const s = JSON.parse(localStorage.getItem(SAVE_KEY));
+    if (s && typeof s === 'object') return Object.assign(defaultSave(), s);
+  } catch(e) {}
+  return defaultSave();
+}
+let save = loadSave();
+function persist(){
+  try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch(e) {}
+}
+
+/* =========================================================
+   CANVAS & PROJEKTION
    ========================================================= */
 const canvas = document.getElementById('game');
-const ctx    = canvas.getContext('2d');
+const ctx = canvas.getContext('2d');
+let W = 0, H = 0, DPR = 1, horizonY = 0, F = 600;
 
-let W = 0, H = 0, DPR = 1;
-let horizonY = 0;      // y-Position des Horizonts
-let F = 600;           // Brennweite (Perspektive)
-
-const CAM_Z = -7;      // Kamera-Z
-const CAM_Y = 2.4;     // Kamera-Höhe
-let camX = 0;          // Kamera-X (folgt dem Spieler leicht)
-
-function resize() {
+function resize(){
   DPR = Math.min(window.devicePixelRatio || 1, 2);
   W = window.innerWidth;
   H = window.innerHeight;
@@ -95,27 +360,17 @@ function resize() {
   canvas.style.width  = W + 'px';
   canvas.style.height = H + 'px';
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
-
   horizonY = H * 0.34;
-  // Brennweite: passt Höhe UND Breite an (wichtig für Handys)
   F = Math.min(H * 0.95, W * 1.25);
 }
 window.addEventListener('resize', resize);
 
-/* =========================================================
-   PROJEKTION (fake 3D)
-   ========================================================= */
-function proj(x, y, z) {
+function proj(x, y, z){
   const depth = z - CAM_Z;
   const s = F / depth;
-  return {
-    x: W / 2 + (x - camX) * s,
-    y: horizonY + (CAM_Y - y) * s,
-    s: s
-  };
+  return { x: W/2 + (x - camX) * s, y: horizonY + (CAM_Y - y) * s, s };
 }
-
-function fillPoly(pts, color) {
+function fillPoly(pts, color){
   ctx.fillStyle = color;
   ctx.beginPath();
   ctx.moveTo(pts[0].x, pts[0].y);
@@ -125,71 +380,467 @@ function fillPoly(pts, color) {
 }
 
 /* =========================================================
-   SPIEL-KONSTANTEN
+   SPIELZUSTAND
    ========================================================= */
-const LANES       = [-1.7, 0, 1.7];   // X-Position der 3 Spuren
-const START_SPEED = 22;
-const MAX_SPEED   = 58;
-const GRAVITY     = 30;
-const JUMP_V      = 9.2;
-const SLIDE_TIME  = 0.62;
-const SPAWN_Z     = 140;              // hier erscheinen Hindernisse
-
-// Hindernis-Typen
-const TYPES = {
-  low: {   // muss man SPRINGEN
-    y0: 0, h: 0.78, w: 1.55, depth: 0.8,
-    colors: { front:'#ff5a3c', top:'#ff8f78', side:'#bd3720' }
-  },
-  high: {  // muss man DUCKEN
-    y0: 1.15, h: 1.5, w: 1.55, depth: 0.8,
-    colors: { front:'#ffc93c', top:'#ffe38a', side:'#c3961f' }
-  },
-  block: { // muss man AUSWEICHEN
-    y0: 0, h: 2.1, w: 1.55, depth: 1.4,
-    colors: { front:'#4a7dff', top:'#8aabff', side:'#2c53b8' }
-  }
-};
-
-/* =========================================================
-   SPIEL-ZUSTAND
-   ========================================================= */
-let gameState = 'menu';   // 'menu' | 'playing' | 'over'
+let screen       = 'menu';
+let worldIndex   = 0;
+let currentGoal  = 300;
+let score        = 0;
+let speed        = 22;
+let distance     = 0;
+let animTime     = 0;
+let camX         = 0;
+let obstacles    = [];
+let clips        = [];
+let spawnT       = 0;
+let clipSpawnT   = 0;
+let clipsThisRun = 0;
+let gameOverFlag = false;
 
 const player = {
-  lane: 1, x: 0,
-  y: 0, vy: 0, jumping: false,
-  sliding: false, slideT: 0
+  lane:1, x:0, y:0, vy:0,
+  jumping:false, sliding:false, slideT:0
 };
 
-let obstacles = [];
-let speed = START_SPEED;
-let distance = 0;
-let score = 0;
-let scrollDist = 0;
-let spawnT = 0;
-let bestScore = +(localStorage.getItem('runner_best') || 0);
+/* =========================================================
+   CHARAKTER-ZEICHNUNG (mit Animation)
+   ========================================================= */
+function drawCharacter(u, opts){
+  const C = opts.colors;
+  const phase = opts.phase || 0;
+  const jumping = opts.jumping;
+  const sliding = opts.sliding;
+  const s = u;
+
+  // Bob beim Laufen
+  const bob = (jumping || sliding) ? 0 : Math.abs(Math.sin(phase)) * 0.05;
+  const bobY = -bob * s;
+
+  const hipY   = -0.62 * s + bobY;
+  const legLen = 0.55 * s;
+  const legW   = 0.17 * s;
+
+  let legSwing = 0;
+  if (!jumping && !sliding) legSwing = Math.sin(phase) * 0.45;
+  else if (jumping) legSwing = -0.55;
+
+  // --- Beine ---
+  ctx.save();
+  ctx.translate(-0.11 * s, hipY);
+  ctx.rotate(legSwing);
+  ctx.fillStyle = C.pants;
+  ctx.fillRect(-legW/2, 0, legW, legLen);
+  ctx.fillStyle = C.shoe;
+  ctx.fillRect(-legW/2 - 0.03*s, legLen - 0.1*s, legW + 0.06*s, 0.12*s);
+  ctx.restore();
+
+  ctx.save();
+  ctx.translate(0.11 * s, hipY);
+  ctx.rotate(-legSwing);
+  ctx.fillStyle = C.pants;
+  ctx.fillRect(-legW/2, 0, legW, legLen);
+  ctx.fillStyle = C.shoe;
+  ctx.fillRect(-legW/2 - 0.03*s, legLen - 0.1*s, legW + 0.06*s, 0.12*s);
+  ctx.restore();
+
+  // --- Körper ---
+  const bodyBot = hipY;
+  const bodyH   = 0.7 * s;
+  const bodyTop = bodyBot - bodyH;
+  ctx.fillStyle = C.shirt;
+  ctx.fillRect(-0.28*s, bodyTop, 0.56*s, bodyH);
+  ctx.fillStyle = C.shirtLight;
+  ctx.fillRect(-0.28*s, bodyTop, 0.56*s, 0.08*s);
+
+  // --- Arme ---
+  const shoulderY = bodyTop + 0.06 * s;
+  const armLen    = 0.42 * s;
+  const armW      = 0.11 * s;
+
+  let armSwing = 0;
+  if (!jumping && !sliding) armSwing = -Math.sin(phase) * 0.55;
+  else if (jumping)          armSwing = 0.7;
+  else if (sliding)          armSwing = -0.4;
+
+  ctx.save();
+  ctx.translate(-0.28*s, shoulderY);
+  ctx.rotate(-armSwing);
+  ctx.fillStyle = C.shirt;
+  ctx.fillRect(-armW/2, 0, armW, armLen);
+  ctx.fillStyle = C.skin;
+  ctx.fillRect(-armW/2, armLen, armW, 0.09*s);
+  ctx.restore();
+
+  ctx.save();
+  ctx.translate(0.28*s, shoulderY);
+  ctx.rotate(armSwing);
+  ctx.fillStyle = C.shirt;
+  ctx.fillRect(-armW/2, 0, armW, armLen);
+  ctx.fillStyle = C.skin;
+  ctx.fillRect(-armW/2, armLen, armW, 0.09*s);
+  ctx.restore();
+
+  // --- Kopf ---
+  const neckY  = bodyTop - 0.02 * s;
+  const headY  = neckY - 0.22 * s;
+  const headR  = 0.2 * s;
+
+  ctx.fillStyle = C.skin;
+  ctx.fillRect(-0.06*s, neckY - 0.03*s, 0.12*s, 0.08*s);
+
+  ctx.beginPath();
+  ctx.arc(0, headY, headR, 0, Math.PI * 2);
+  ctx.fillStyle = C.skin;
+  ctx.fill();
+
+  // Haare
+  if (opts.hair){
+    ctx.fillStyle = opts.hair;
+    ctx.beginPath();
+    ctx.arc(0, headY - 0.03*s, headR * 1.05, Math.PI, Math.PI * 2);
+    ctx.fill();
+    ctx.fillRect(-headR - 0.02*s, headY - 0.03*s, 0.06*s, 0.42*s);
+    ctx.fillRect( headR - 0.04*s, headY - 0.03*s, 0.06*s, 0.42*s);
+  }
+
+  // Augen
+  ctx.fillStyle = '#171a22';
+  ctx.beginPath();
+  ctx.arc(-0.075*s, headY - 0.02*s, 0.028*s, 0, Math.PI*2);
+  ctx.arc( 0.075*s, headY - 0.02*s, 0.028*s, 0, Math.PI*2);
+  ctx.fill();
+
+  // Hut
+  if (C.hat){
+    const hatBaseY = headY - 0.15 * s;
+    ctx.fillStyle = C.hat;
+    ctx.fillRect(-0.28*s, hatBaseY - 0.05*s, 0.56*s, 0.07*s);
+    ctx.fillRect(-0.22*s, hatBaseY - 0.22*s, 0.44*s, 0.18*s);
+    ctx.fillStyle = C.hatLight || C.hat;
+    ctx.fillRect(-0.22*s, hatBaseY - 0.22*s, 0.44*s, 0.035*s);
+  }
+}
 
 /* =========================================================
-   RESET / START / GAME OVER
+   RENDERING
    ========================================================= */
-const $score    = document.getElementById('score');
-const $bestVal  = document.getElementById('bestVal');
-const $overlay  = document.getElementById('overlay');
-const $startBtn = document.getElementById('startBtn');
-const $finalBox = document.getElementById('finalScore');
-const $finalVal = document.getElementById('finalVal');
+function getWorld(){ return WORLDS[worldIndex] || WORLDS[0]; }
 
-$bestVal.textContent = bestScore;
+function drawGround(){
+  const w = getWorld();
 
-function resetGame() {
-  obstacles = [];
-  speed = START_SPEED;
-  distance = 0;
+  const sky = ctx.createLinearGradient(0, 0, 0, horizonY + 60);
+  sky.addColorStop(0,    w.sky[0]);
+  sky.addColorStop(0.55, w.sky[1]);
+  sky.addColorStop(1,    w.sky[2]);
+  ctx.fillStyle = sky;
+  ctx.fillRect(0, 0, W, horizonY + 2);
+
+  const gr = ctx.createLinearGradient(0, horizonY, 0, H);
+  gr.addColorStop(0, w.ground[0]);
+  gr.addColorStop(1, w.ground[1]);
+  ctx.fillStyle = gr;
+  ctx.fillRect(0, horizonY, W, H - horizonY);
+
+  const glow = ctx.createLinearGradient(0, horizonY - 70, 0, horizonY + 8);
+  glow.addColorStop(0, 'rgba(255,255,255,0)');
+  glow.addColorStop(1, w.groundLine);
+  ctx.fillStyle = glow;
+  ctx.fillRect(0, horizonY - 70, W, 80);
+
+  for (const lx of [-2.62, 2.62]){
+    fillPoly([
+      proj(lx - 0.07, 0, -5), proj(lx + 0.07, 0, -5),
+      proj(lx + 0.07, 0, 140), proj(lx - 0.07, 0, 140)
+    ], w.groundLine);
+  }
+
+  const period = 7, dashLen = 3.2;
+  let z0 = -(distance % period);
+  while (z0 < 130){
+    const za = Math.max(z0, -5);
+    const zb = Math.min(z0 + dashLen, 130);
+    if (zb > za + 0.01){
+      for (const lx of [-0.85, 0.85]){
+        fillPoly([
+          proj(lx - 0.045, 0, za), proj(lx + 0.045, 0, za),
+          proj(lx + 0.045, 0, zb), proj(lx - 0.045, 0, zb)
+        ], w.dash);
+      }
+    }
+    z0 += period;
+  }
+}
+
+function drawBox(cx, z, w, h, y0, depth, colors){
+  const nz = z - depth/2, fz = z + depth/2;
+  if (nz - CAM_Z < 1.5) return;
+
+  const x1 = cx - w/2, x2 = cx + w/2;
+  const y1 = y0,       y2 = y0 + h;
+
+  const p = [
+    proj(x1, y2, nz), proj(x2, y2, nz),
+    proj(x2, y1, nz), proj(x1, y1, nz),
+    proj(x1, y2, fz), proj(x2, y2, fz),
+    proj(x2, y1, fz), proj(x1, y1, fz)
+  ];
+
+  if (CAM_Y > y2) fillPoly([p[0],p[1],p[5],p[4]], colors.top);
+  if (camX < x1) fillPoly([p[0],p[4],p[7],p[3]], colors.side);
+  if (camX > x2) fillPoly([p[1],p[5],p[6],p[2]], colors.side);
+  fillPoly([p[0],p[1],p[2],p[3]], colors.front);
+}
+function drawObstacle(o){ drawBox(o.x, o.z, o.w, o.h, o.y0, o.depth, o.colors); }
+
+function drawClip(c){
+  if (c.z - CAM_Z < 1.5) return;
+  const p = proj(c.x, c.y, c.z);
+  const w = 0.26 * p.s;
+  const h = 0.32 * p.s;
+  const spinScale = Math.max(0.25, Math.abs(Math.cos(c.spin)));
+
+  ctx.save();
+  ctx.translate(p.x, p.y);
+
+  ctx.globalAlpha = 0.3;
+  ctx.fillStyle = '#ffc93c';
+  ctx.beginPath();
+  ctx.ellipse(0, h * 1.1, w * 0.9, h * 0.15, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.globalAlpha = 1;
+
+  ctx.fillStyle = '#ffc93c';
+  ctx.beginPath();
+  ctx.ellipse(0, 0, w * spinScale, h, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.fillStyle = '#ffe680';
+  ctx.beginPath();
+  ctx.ellipse(-w * spinScale * 0.3, -h * 0.25, w * spinScale * 0.4, h * 0.35, 0, 0, Math.PI * 2);
+  ctx.fill();
+
+  ctx.strokeStyle = '#b8860b';
+  ctx.lineWidth = Math.max(1, w * 0.1);
+  ctx.beginPath();
+  ctx.ellipse(0, 0, w * spinScale, h, 0, 0, Math.PI * 2);
+  ctx.stroke();
+
+  ctx.restore();
+}
+
+function drawPlayerCharacter(){
+  const s  = F / (0 - CAM_Z);
+  const groundScreenY = horizonY + CAM_Y * s;
+  const px = W / 2 + (player.x - camX) * s;
+  const feetY = groundScreenY - player.y * s;
+
+  const sh = Math.max(0.4, 1 - player.y * 0.3);
+  ctx.save();
+  ctx.globalAlpha = 0.35 * sh;
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.ellipse(px, groundScreenY, 0.42*s*sh, 0.13*s*sh, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.save();
+  ctx.translate(px, feetY);
+  if (player.sliding){
+    ctx.scale(1.15, 0.55);
+    ctx.translate(0.12 * s, 0);
+  }
+  const skin = SKINS.find(x => x.id === save.selectedSkin) || SKINS[0];
+  drawCharacter(s, {
+    colors: skin.colors,
+    phase: (player.jumping || player.sliding) ? 0 : animTime * 14,
+    jumping: player.jumping,
+    sliding: player.sliding
+  });
+  ctx.restore();
+}
+
+function drawChaser(){
+  const s = F / (CHASER_Z - CAM_Z);
+  const groundScreenY = horizonY + CAM_Y * s;
+  const cx = W / 2 + (player.x * 0.4 + 0.6 - camX) * s;
+
+  ctx.save();
+  ctx.globalAlpha = 0.35;
+  ctx.fillStyle = '#000';
+  ctx.beginPath();
+  ctx.ellipse(cx, groundScreenY, 0.42*s, 0.13*s, 0, 0, Math.PI*2);
+  ctx.fill();
+  ctx.restore();
+
+  ctx.save();
+  ctx.translate(cx, groundScreenY);
+  drawCharacter(s, {
+    phase: animTime * 16 + 1.5,
+    colors: {
+      shirt:'#ff4080', shirtLight:'#ff80b0',
+      pants:'#7a2a8a', skin:'#f2c49b', shoe:'#ffffff'
+    },
+    hair: '#3a2050'
+  });
+  ctx.restore();
+}
+
+function render(){
+  ctx.clearRect(0, 0, W, H);
+  drawGround();
+
+  const sorted = obstacles.slice().sort((a, b) => b.z - a.z);
+  for (const o of sorted){
+    if (o.z > 0) drawObstacle(o);
+  }
+
+  const sortedClips = clips.slice().sort((a, b) => b.z - a.z);
+  for (const c of sortedClips){
+    if (!c.collected && c.z > 0) drawClip(c);
+  }
+
+  drawPlayerCharacter();
+  drawChaser();
+}
+
+/* =========================================================
+   SPAWNING
+   ========================================================= */
+function pickType(){
+  const r = Math.random();
+  if (r < 0.34) return 'low';
+  if (r < 0.68) return 'high';
+  return 'block';
+}
+
+function spawnObstacle(){
+  const w = getWorld();
+  const progress = Math.min(1, distance / 900);
+  let lanes;
+
+  if (distance < 150 || Math.random() < 0.62){
+    lanes = [Math.floor(Math.random() * 3)];
+  } else {
+    const free = Math.floor(Math.random() * 3);
+    lanes = [0, 1, 2].filter(l => l !== free);
+  }
+
+  for (const ln of lanes){
+    const t = pickType();
+    const d = TYPES[t];
+    obstacles.push({
+      x: LANES[ln], z: SPAWN_Z,
+      y0: d.y0, h: d.h, w: d.w, depth: d.depth,
+      colors: w.obstacle[t]
+    });
+  }
+
+  const base = 1.3 - 0.55 * progress;
+  spawnT = (lanes.length > 1 ? base * 1.55 : base) + Math.random() * 0.3;
+}
+
+function spawnClipLine(){
+  const lane = Math.floor(Math.random() * 3);
+  const count = 3 + Math.floor(Math.random() * 4);
+  for (let i = 0; i < count; i++){
+    clips.push({
+      x: LANES[lane],
+      z: SPAWN_Z + i * 2.8,
+      y: 0.5,
+      spin: Math.random() * Math.PI * 2,
+      collected: false
+    });
+  }
+  clipSpawnT = 3 + Math.random() * 4;
+}
+
+/* =========================================================
+   UPDATE
+   ========================================================= */
+function update(dt){
+  distance += speed * dt;
+  score = Math.floor(distance);
+  speed = Math.min(60, 22 + distance * 0.03 + worldIndex * 2);
+
+  document.getElementById('scoreVal').textContent = score;
+  if (score > save.bestScore){
+    document.getElementById('bestVal').textContent = score;
+  }
+
+  const targetX = LANES[player.lane];
+  player.x += (targetX - player.x) * Math.min(1, dt * 16);
+
+  if (player.jumping){
+    player.vy -= GRAVITY * dt;
+    player.y  += player.vy * dt;
+    if (player.y <= 0){ player.y = 0; player.vy = 0; player.jumping = false; }
+  }
+  if (player.sliding){
+    player.slideT -= dt;
+    if (player.slideT <= 0) player.sliding = false;
+  }
+
+  for (const o of obstacles) o.z -= speed * dt;
+
+  for (const o of obstacles){
+    if (!o.passed && o.z <= 0.4){
+      o.passed = true;
+      if (checkHit(o)){ gameOver(); return; }
+    }
+  }
+  obstacles = obstacles.filter(o => o.z > -6);
+
+  for (const c of clips){
+    if (c.collected) continue;
+    c.z -= speed * dt;
+    c.spin += dt * 5;
+    if (Math.abs(c.z) < 0.7 && Math.abs(player.x - c.x) < 0.8){
+      c.collected = true;
+      clipsThisRun++;
+      save.clips++;
+      document.getElementById('clipVal').textContent = clipsThisRun;
+    }
+  }
+  clips = clips.filter(c => !c.collected && c.z > -6);
+
+  spawnT -= dt;
+  if (spawnT <= 0) spawnObstacle();
+
+  clipSpawnT -= dt;
+  if (clipSpawnT <= 0) spawnClipLine();
+
+  camX = player.x * 0.3;
+
+  if (score >= currentGoal) worldComplete();
+}
+
+function checkHit(o){
+  if (Math.abs(player.x - o.x) > 0.95) return false;
+  const pBot = player.y;
+  const pTop = player.y + (player.sliding ? 0.85 : 1.88);
+  const oBot = o.y0;
+  const oTop = o.y0 + o.h;
+  return pBot < oTop && pTop > oBot;
+}
+
+/* =========================================================
+   FLOW
+   ========================================================= */
+function startGame(worldIdx){
+  worldIndex  = worldIdx;
+  currentGoal = WORLDS[worldIdx].goal;
+
   score = 0;
-  scrollDist = 0;
+  distance = 0;
+  speed = 22 + worldIdx * 2;
+  obstacles = [];
+  clips = [];
   spawnT = 0.9;
+  clipSpawnT = 1.5;
   camX = 0;
+  clipsThisRun = 0;
+  gameOverFlag = false;
 
   player.lane = 1;
   player.x = 0;
@@ -199,370 +850,234 @@ function resetGame() {
   player.sliding = false;
   player.slideT = 0;
 
-  $score.textContent = 0;
+  document.getElementById('scoreVal').textContent = 0;
+  document.getElementById('clipVal').textContent  = 0;
+  document.getElementById('bestVal').textContent  = save.bestScore;
+
+  setScreen('playing');
 }
 
-function startGame() {
-  resetGame();
-  gameState = 'playing';
-  $overlay.classList.add('hidden');
+function gameOver(){
+  if (gameOverFlag) return;
+  gameOverFlag = true;
+
+  if (score > save.bestScore) save.bestScore = score;
+  if (score > (save.worldBest[worldIndex] || 0)) save.worldBest[worldIndex] = score;
+  persist();
+
+  document.getElementById('goScore').textContent = score;
+  document.getElementById('goClips').textContent = '+' + clipsThisRun + ' Clips';
+  setScreen('over');
 }
 
-function gameOver() {
-  gameState = 'over';
-  if (score > bestScore) {
-    bestScore = score;
-    localStorage.setItem('runner_best', bestScore);
-    $bestVal.textContent = bestScore;
+function worldComplete(){
+  if (gameOverFlag) return;
+  gameOverFlag = true;
+
+  if (score > save.bestScore) save.bestScore = score;
+  save.worldBest[worldIndex] = Math.max(save.worldBest[worldIndex] || 0, score);
+
+  let nextWorldAvailable = false;
+  if (worldIndex + 1 < WORLDS.length){
+    save.unlockedWorld = Math.max(save.unlockedWorld, worldIndex + 2);
+    nextWorldAvailable = true;
   }
-  $finalVal.textContent = score;
-  $finalBox.style.display = 'block';
-  $startBtn.textContent = 'NOCHMAL';
-  $overlay.classList.remove('hidden');
+  persist();
+
+  document.getElementById('wcScore').textContent = score;
+  const info = document.getElementById('wcInfo');
+  const btnNext = document.getElementById('btnNextWorld');
+  if (nextWorldAvailable){
+    info.textContent = 'Welt ' + (worldIndex + 2) + ' freigeschaltet!';
+    btnNext.style.display = 'block';
+    btnNext.textContent = 'WELT ' + (worldIndex + 2);
+  } else {
+    info.textContent = 'Du hast alle Welten geschafft!';
+    btnNext.style.display = 'none';
+  }
+  setScreen('complete');
 }
 
 /* =========================================================
-   STEUERUNG
+   UI
+   ========================================================= */
+function setScreen(name){
+  screen = name;
+  ['menu', 'worlds', 'shop', 'over', 'complete'].forEach(s => {
+    const el = document.getElementById(s + 'Screen');
+    if (el) el.classList.toggle('hidden', s !== name);
+  });
+  document.getElementById('hud').style.display = (name === 'playing') ? 'flex' : 'none';
+  if (name === 'worlds') renderWorlds();
+  if (name === 'shop')   renderShop();
+}
+
+function renderWorlds(){
+  const grid = document.getElementById('worldGrid');
+  grid.innerHTML = '';
+  for (let i = 0; i < WORLDS.length; i++){
+    const w = WORLDS[i];
+    const unlocked = i < save.unlockedWorld;
+    const best = save.worldBest[i] || 0;
+
+    const card = document.createElement('div');
+    card.className = 'worldCard' + (unlocked ? '' : ' locked');
+
+    const band = document.createElement('div');
+    band.className = 'worldBand';
+    band.style.background = 'linear-gradient(90deg, ' + w.sky[1] + ', ' + w.sky[2] + ')';
+    card.appendChild(band);
+
+    const num = document.createElement('div');
+    num.className = 'worldNum';
+    num.textContent = unlocked ? ('WELT ' + (i + 1)) : '🔒';
+    card.appendChild(num);
+
+    const name = document.createElement('div');
+    name.className = 'worldName';
+    name.textContent = w.name;
+    card.appendChild(name);
+
+    const info = document.createElement('div');
+    info.className = 'worldInfo';
+    info.textContent = unlocked
+      ? (best > 0 ? ('Best: ' + best) : ('Ziel: ' + w.goal))
+      : 'Gesperrt';
+    card.appendChild(info);
+
+    if (unlocked) card.onclick = () => startGame(i);
+    grid.appendChild(card);
+  }
+}
+
+function renderShop(){
+  const grid = document.getElementById('skinGrid');
+  grid.innerHTML = '';
+  document.getElementById('shopClips').textContent = save.clips;
+
+  for (const skin of SKINS){
+    const owned    = save.ownedSkins.includes(skin.id);
+    const equipped = save.selectedSkin === skin.id;
+
+    const card = document.createElement('div');
+    card.className = 'skinCard' + (equipped ? ' equipped' : '');
+
+    const preview = document.createElement('div');
+    preview.className = 'skinPreview';
+    preview.style.background =
+      'linear-gradient(135deg, ' + skin.colors.shirt + ', ' +
+      (skin.colors.hat || skin.colors.shirtLight) + ')';
+    card.appendChild(preview);
+
+    const name = document.createElement('div');
+    name.className = 'skinName';
+    name.textContent = skin.name;
+    card.appendChild(name);
+
+    const btn = document.createElement('button');
+    btn.className = 'skinBtn';
+    if (equipped){
+      btn.textContent = '✓ AKTIV';
+      btn.disabled = true;
+    } else if (owned){
+      btn.textContent = 'AUSWÄHLEN';
+      btn.onclick = () => {
+        save.selectedSkin = skin.id;
+        persist();
+        renderShop();
+      };
+    } else if (save.clips >= skin.price){
+      btn.textContent = skin.price + ' 🎬';
+      btn.onclick = () => {
+        save.clips -= skin.price;
+        save.ownedSkins.push(skin.id);
+        save.selectedSkin = skin.id;
+        persist();
+        renderShop();
+      };
+    } else {
+      btn.textContent = '🔒 ' + skin.price;
+      btn.disabled = true;
+    }
+    card.appendChild(btn);
+    grid.appendChild(card);
+  }
+}
+
+/* =========================================================
+   INPUT
    ========================================================= */
 function moveLeft()  { if (player.lane > 0) player.lane--; }
 function moveRight() { if (player.lane < 2) player.lane++; }
-
-function doJump() {
+function doJump(){
   if (player.jumping || player.sliding) return;
-  player.jumping = true;
-  player.vy = JUMP_V;
+  player.jumping = true; player.vy = JUMP_V;
 }
-
-function doSlide() {
+function doSlide(){
   if (player.sliding || player.jumping) return;
-  player.sliding = true;
-  player.slideT = SLIDE_TIME;
+  player.sliding = true; player.slideT = SLIDE_T;
 }
 
 window.addEventListener('keydown', (e) => {
+  if (screen !== 'playing') return;
   const k = e.key.toLowerCase();
-
-  if (gameState !== 'playing') {
-    if (k === ' ' || k === 'enter') { e.preventDefault(); startGame(); }
-    return;
-  }
-
-  if (k === 'arrowleft'  || k === 'a') { e.preventDefault(); moveLeft(); }
-  else if (k === 'arrowright' || k === 'd') { e.preventDefault(); moveRight(); }
-  else if (k === 'arrowup'    || k === 'w' || k === ' ') { e.preventDefault(); doJump(); }
-  else if (k === 'arrowdown'  || k === 's') { e.preventDefault(); doSlide(); }
+  if      (k === 'arrowleft'  || k === 'a'){ e.preventDefault(); moveLeft(); }
+  else if (k === 'arrowright' || k === 'd'){ e.preventDefault(); moveRight(); }
+  else if (k === 'arrowup'    || k === 'w' || k === ' '){ e.preventDefault(); doJump(); }
+  else if (k === 'arrowdown'  || k === 's'){ e.preventDefault(); doSlide(); }
 });
 
-// Touch / Swipe
 let touchStart = null;
 canvas.addEventListener('touchstart', (e) => {
-  touchStart = {
-    x: e.touches[0].clientX,
-    y: e.touches[0].clientY
-  };
+  touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
 }, { passive: true });
-
 canvas.addEventListener('touchend', (e) => {
-  if (!touchStart) return;
+  if (!touchStart || screen !== 'playing') return;
   const dx = e.changedTouches[0].clientX - touchStart.x;
   const dy = e.changedTouches[0].clientY - touchStart.y;
   const adx = Math.abs(dx), ady = Math.abs(dy);
-
-  if (Math.max(adx, ady) < 26) {
-    if (gameState !== 'playing') startGame();
-  } else if (gameState === 'playing') {
-    if (adx > ady) { dx > 0 ? moveRight() : moveLeft(); }
-    else           { dy > 0 ? doSlide()  : doJump();   }
+  if (Math.max(adx, ady) > 26){
+    if (adx > ady) dx > 0 ? moveRight() : moveLeft();
+    else           dy > 0 ? doSlide()  : doJump();
   }
   touchStart = null;
 }, { passive: true });
 
-$startBtn.addEventListener('click', startGame);
-
 /* =========================================================
-   HINDERNISSE
+   BUTTONS
    ========================================================= */
-function pickType() {
-  const r = Math.random();
-  if (r < 0.34) return 'low';
-  if (r < 0.68) return 'high';
-  return 'block';
-}
-
-function spawnObstacle() {
-  const progress = Math.min(1, distance / 900);
-  let lanes;
-
-  if (distance < 150 || Math.random() < 0.62) {
-    // eine Spur
-    lanes = [Math.floor(Math.random() * 3)];
-  } else {
-    // zwei Spuren – eine bleibt frei
-    const free = Math.floor(Math.random() * 3);
-    lanes = [0, 1, 2].filter(l => l !== free);
-  }
-
-  for (const ln of lanes) {
-    const type = pickType();
-    const def = TYPES[type];
-    obstacles.push({
-      x: LANES[ln],
-      z: SPAWN_Z,
-      y0: def.y0, h: def.h, w: def.w, depth: def.depth,
-      colors: def.colors,
-      passed: false
-    });
-  }
-
-  const base = 1.25 - 0.45 * progress;      // wird mit der Zeit enger
-  spawnT = (lanes.length > 1 ? base * 1.55 : base) + Math.random() * 0.3;
-}
+document.getElementById('btnPlay').onclick  = () => setScreen('worlds');
+document.getElementById('btnShop').onclick  = () => setScreen('shop');
+document.getElementById('btnRetry').onclick = () => startGame(worldIndex);
+document.getElementById('btnNextWorld').onclick = () => {
+  if (worldIndex + 1 < WORLDS.length) startGame(worldIndex + 1);
+};
+document.querySelectorAll('[data-back]').forEach(b => {
+  b.onclick = () => setScreen('menu');
+});
 
 /* =========================================================
-   UPDATE
-   ========================================================= */
-function update(dt) {
-  /* --- Geschwindigkeit & Score --- */
-  distance += speed * dt;
-  scrollDist += speed * dt;
-  score = Math.floor(distance);
-  speed = Math.min(MAX_SPEED, START_SPEED + distance * 0.02);
-
-  $score.firstChild.nodeValue = score;
-
-  /* --- Spieler horizontal --- */
-  const targetX = LANES[player.lane];
-  player.x += (targetX - player.x) * Math.min(1, dt * 16);
-
-  /* --- Sprung --- */
-  if (player.jumping) {
-    player.vy -= GRAVITY * dt;
-    player.y  += player.vy * dt;
-    if (player.y <= 0) { player.y = 0; player.vy = 0; player.jumping = false; }
-  }
-
-  /* --- Ducken --- */
-  if (player.sliding) {
-    player.slideT -= dt;
-    if (player.slideT <= 0) player.sliding = false;
-  }
-
-  /* --- Hindernisse bewegen --- */
-  for (const o of obstacles) o.z -= speed * dt;
-
-  /* --- Kollision --- */
-  for (const o of obstacles) {
-    if (!o.passed && o.z <= 0.4) {
-      o.passed = true;
-      if (checkHit(o)) { gameOver(); return; }
-    }
-  }
-
-  /* --- Aufräumen --- */
-  obstacles = obstacles.filter(o => o.z > -6);
-
-  /* --- Nachschub --- */
-  spawnT -= dt;
-  if (spawnT <= 0) spawnObstacle();
-
-  /* --- Kamera --- */
-  camX = player.x * 0.3;
-}
-
-function checkHit(o) {
-  // Seitlicher Abstand
-  if (Math.abs(player.x - o.x) > 0.95) return false;
-
-  // Höhen-Überlappung (AABB)
-  const pBot = player.y;
-  const pTop = player.y + (player.sliding ? 0.85 : 1.88);
-  const oBot = o.y0;
-  const oTop = o.y0 + o.h;
-
-  return pBot < oTop && pTop > oBot;
-}
-
-/* =========================================================
-   RENDERING
-   ========================================================= */
-function drawGround() {
-  // Himmel
-  const sky = ctx.createLinearGradient(0, 0, 0, horizonY + 60);
-  sky.addColorStop(0,    '#0b1230');
-  sky.addColorStop(0.55, '#22306b');
-  sky.addColorStop(1,    '#5b6ea8');
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, W, horizonY + 2);
-
-  // Boden
-  const gr = ctx.createLinearGradient(0, horizonY, 0, H);
-  gr.addColorStop(0, '#20242f');
-  gr.addColorStop(1, '#0a0c12');
-  ctx.fillStyle = gr;
-  ctx.fillRect(0, horizonY, W, H - horizonY);
-
-  // Horizont-Glow
-  const glow = ctx.createLinearGradient(0, horizonY - 70, 0, horizonY + 8);
-  glow.addColorStop(0, 'rgba(120,160,255,0)');
-  glow.addColorStop(1, 'rgba(120,160,255,0.28)');
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, horizonY - 70, W, 80);
-
-  // Außenkanten (durchgezogen)
-  for (const lx of [-2.62, 2.62]) {
-    fillPoly([
-      proj(lx - 0.07, 0, -5), proj(lx + 0.07, 0, -5),
-      proj(lx + 0.07, 0, 140), proj(lx - 0.07, 0, 140)
-    ], 'rgba(140,170,255,0.30)');
-  }
-
-  // Gestrichelte Spurlinien
-  const period = 7, dashLen = 3.2;
-  let z0 = -(scrollDist % period);
-  while (z0 < 130) {
-    const za = Math.max(z0, -5);
-    const zb = Math.min(z0 + dashLen, 130);
-    if (zb > za + 0.01) {
-      for (const lx of [-0.85, 0.85]) {
-        fillPoly([
-          proj(lx - 0.045, 0, za), proj(lx + 0.045, 0, za),
-          proj(lx + 0.045, 0, zb), proj(lx - 0.045, 0, zb)
-        ], 'rgba(200,215,255,0.42)');
-      }
-    }
-    z0 += period;
-  }
-}
-
-function drawBox(cx, z, w, h, y0, depth, colors) {
-  const nz = z - depth / 2;
-  const fz = z + depth / 2;
-  if (nz - CAM_Z < 1.5) return;          // zu nah an der Kamera
-
-  const x1 = cx - w / 2, x2 = cx + w / 2;
-  const y1 = y0,         y2 = y0 + h;
-
-  const p = [
-    proj(x1, y2, nz), proj(x2, y2, nz),  // 0,1  nah oben
-    proj(x2, y1, nz), proj(x1, y1, nz),  // 2,3  nah unten
-    proj(x1, y2, fz), proj(x2, y2, fz),  // 4,5  fern oben
-    proj(x2, y1, fz), proj(x1, y1, fz)   // 6,7  fern unten
-  ];
-
-  if (CAM_Y > y2) fillPoly([p[0], p[1], p[5], p[4]], colors.top);   // Deckel
-  if (camX < x1)  fillPoly([p[0], p[4], p[7], p[3]], colors.side);  // links
-  if (camX > x2)  fillPoly([p[1], p[5], p[6], p[2]], colors.side);  // rechts
-  fillPoly([p[0], p[1], p[2], p[3]], colors.front);                 // Front
-}
-
-function drawObstacle(o) {
-  drawBox(o.x, o.z, o.w, o.h, o.y0, o.depth, o.colors);
-}
-
-/* --------- Der Charakter mit Hut --------- */
-function drawGuy(u) {
-  function rect(x, y, w, h, color) {
-    ctx.fillStyle = color;
-    ctx.fillRect(x * u, -(y + h) * u, w * u, h * u);
-  }
-  function circle(cx, cy, r, color) {
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(cx * u, -cy * u, r * u, 0, Math.PI * 2);
-    ctx.fill();
-  }
-
-  // Beine
-  rect(-0.20, 0.10, 0.16, 0.54, '#2b2f45');
-  rect( 0.04, 0.10, 0.16, 0.54, '#2b2f45');
-  // Schuhe
-  rect(-0.24, 0.00, 0.22, 0.13, '#e9ecf5');
-  rect( 0.02, 0.00, 0.22, 0.13, '#e9ecf5');
-  // Körper / Jacke
-  rect(-0.28, 0.58, 0.56, 0.74, '#ff6b35');
-  rect(-0.28, 0.58, 0.56, 0.10, '#ff8f5e');
-  // Arme
-  rect(-0.39, 0.70, 0.12, 0.48, '#ff6b35');
-  rect( 0.27, 0.70, 0.12, 0.48, '#ff6b35');
-  // Hände
-  rect(-0.39, 0.60, 0.12, 0.12, '#f2c49b');
-  rect( 0.27, 0.60, 0.12, 0.12, '#f2c49b');
-  // Hals
-  rect(-0.07, 1.28, 0.14, 0.12, '#f2c49b');
-  // Kopf
-  circle(0, 1.53, 0.205, '#f2c49b');
-  // Augen
-  circle(-0.075, 1.57, 0.032, '#171a22');
-  circle( 0.075, 1.57, 0.032, '#171a22');
-  // === HUT ===
-  rect(-0.27, 1.68, 0.54, 0.065, '#e63946');   // Krempe
-  rect(-0.21, 1.745, 0.42, 0.17, '#e63946');   // Krone
-  rect(-0.21, 1.745, 0.42, 0.045, '#ff6270');  // Glanzstreifen
-  rect(-0.21, 1.83,  0.42, 0.03, '#a8232e');   // Schatten
-}
-
-function drawPlayer() {
-  const s = F / (0 - CAM_Z);                       // Maßstab auf Spieler-Tiefe
-  const groundScreenY = horizonY + CAM_Y * s;
-  const px = W / 2 + (player.x - camX) * s;
-  const feetY = groundScreenY - player.y * s;
-
-  // Schatten
-  const sh = Math.max(0.35, 1 - player.y * 0.28);
-  ctx.save();
-  ctx.globalAlpha = 0.32 * sh;
-  ctx.fillStyle = '#000';
-  ctx.beginPath();
-  ctx.ellipse(px, groundScreenY, 0.42 * s * sh, 0.15 * s * sh, 0, 0, Math.PI * 2);
-  ctx.fill();
-  ctx.restore();
-
-  ctx.save();
-  ctx.translate(px, feetY);
-
-  if (player.sliding) {
-    // geduckt = gestaucht + leicht nach vorne gelehnt
-    ctx.scale(1.22, 0.48);
-    ctx.translate(0.12 * s, 0);
-  }
-
-  drawGuy(s);
-  ctx.restore();
-}
-
-function render() {
-  ctx.clearRect(0, 0, W, H);
-
-  drawGround();
-
-  // nach Tiefe sortiert zeichnen
-  const sorted = obstacles.slice().sort((a, b) => b.z - a.z);
-
-  for (const o of sorted) if (o.z > 0) drawObstacle(o);   // hinter dem Spieler
-  drawPlayer();
-  for (const o of sorted) if (o.z <= 0) drawObstacle(o);  // vor dem Spieler
-}
-
-/* =========================================================
-   GAME LOOP
+   LOOP
    ========================================================= */
 let lastTime = performance.now();
-
-function loop(now) {
+function loop(now){
   let dt = (now - lastTime) / 1000;
   lastTime = now;
-  if (dt > 0.05) dt = 0.05;   // Stabilität nach Tab-Wechsel
+  if (dt > 0.05) dt = 0.05;
+  animTime += dt;
 
-  if (gameState === 'playing') update(dt);
+  if (screen === 'playing' && !gameOverFlag) update(dt);
 
   render();
   requestAnimationFrame(loop);
 }
 
 /* =========================================================
-   LOS GEHT'S
+   INIT
    ========================================================= */
 resize();
+document.getElementById('bestVal').textContent = save.bestScore;
+setScreen('menu');
 requestAnimationFrame(loop);
 
 })();
