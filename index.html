@@ -11,7 +11,6 @@
     color:#fff; user-select:none; -webkit-user-select:none; }
   #game { display:block; width:100%; height:100%; touch-action:none; }
 
-  /* HUD */
   #hud { position:fixed; top:0; left:0; right:0; padding:16px 20px;
     display:none; justify-content:space-between; align-items:flex-start;
     pointer-events:none; text-shadow:0 2px 12px rgba(0,0,0,.85); }
@@ -20,58 +19,47 @@
   #hud .stat .lbl { font-size:10px; font-weight:600; opacity:.65; letter-spacing:2px; margin-top:4px; }
   #hud .stat.mid .val { font-size:26px; color:#ffc93c; }
 
-  /* Screens */
   .screen {
     position:fixed; inset:0; display:flex; flex-direction:column;
     align-items:center; justify-content:center; gap:16px;
-    padding:24px; z-index:10;
+    padding:24px; z-index:10; overflow-y:auto;
     background:radial-gradient(circle at 50% 40%, rgba(20,30,70,.85), rgba(5,7,14,.97));
     backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px);
-    overflow-y:auto;
   }
   .screen.hidden { display:none; }
   .screen h1 { font-size:clamp(28px,7vw,48px); font-weight:900; letter-spacing:3px;
     background:linear-gradient(180deg,#fff,#8fa8ff);
     -webkit-background-clip:text; background-clip:text; color:transparent; }
-  .screen h2 { font-size:clamp(22px,5vw,32px); font-weight:800; letter-spacing:2px;
-    margin-bottom:8px; }
-  .screen p { font-size:14px; line-height:1.7; opacity:.85; max-width:440px;
-    text-align:center; }
+  .screen h2 { font-size:clamp(22px,5vw,32px); font-weight:800; letter-spacing:2px; margin-bottom:8px; }
+  .screen p { font-size:14px; line-height:1.7; opacity:.85; max-width:440px; text-align:center; }
 
   .btnMain {
     padding:15px 48px; font-size:17px; font-weight:800; letter-spacing:2px;
     border:none; border-radius:100px; cursor:pointer; color:#0b0d13;
     background:linear-gradient(180deg,#8fe3ff,#4a9dff);
-    box-shadow:0 8px 24px rgba(74,157,255,.4);
-    transition:transform .12s;
+    box-shadow:0 8px 24px rgba(74,157,255,.4); transition:transform .12s;
   }
   .btnMain:active { transform:scale(.96); }
-  .btnMain.secondary {
-    background:linear-gradient(180deg,#ffd060,#ff9500);
-    box-shadow:0 8px 24px rgba(255,149,0,.4);
-  }
-  .btnMain.tertiary {
-    background:linear-gradient(180deg,#c0a0ff,#8040ff); color:#fff;
-    box-shadow:0 8px 24px rgba(128,64,255,.4);
-  }
+  .btnMain.secondary { background:linear-gradient(180deg,#ffd060,#ff9500);
+    box-shadow:0 8px 24px rgba(255,149,0,.4); }
+  .btnMain.tertiary { background:linear-gradient(180deg,#c0a0ff,#8040ff);
+    color:#fff; box-shadow:0 8px 24px rgba(128,64,255,.4); }
   .btnBack {
     padding:10px 28px; font-size:13px; font-weight:700; letter-spacing:2px;
     background:rgba(255,255,255,.08); border:1px solid rgba(255,255,255,.15);
     border-radius:100px; color:#fff; cursor:pointer; transition:background .15s;
   }
   .btnBack:hover { background:rgba(255,255,255,.16); }
-
   .menuBtns { display:flex; flex-direction:column; gap:12px; margin-top:16px; }
 
   #worldGrid, #skinGrid {
     display:grid; grid-template-columns:repeat(auto-fill, minmax(140px, 1fr));
-    gap:12px; max-width:760px; width:100%; padding:8px;
+    gap:12px; max-width:820px; width:100%; padding:8px;
   }
   .worldCard {
     position:relative; background:rgba(255,255,255,.05);
-    border:1px solid rgba(255,255,255,.1);
-    border-radius:14px; padding:16px 12px 14px; cursor:pointer;
-    transition:all .15s; overflow:hidden;
+    border:1px solid rgba(255,255,255,.1); border-radius:14px;
+    padding:16px 12px 14px; cursor:pointer; transition:all .15s; overflow:hidden;
   }
   .worldCard:hover { transform:translateY(-3px); background:rgba(255,255,255,.1); }
   .worldCard.locked { opacity:.4; cursor:not-allowed; }
@@ -82,29 +70,23 @@
   .worldInfo { font-size:11px; opacity:.7; }
 
   .skinCard {
-    background:rgba(255,255,255,.05);
-    border:1px solid rgba(255,255,255,.1);
+    background:rgba(255,255,255,.05); border:1px solid rgba(255,255,255,.1);
     border-radius:14px; padding:14px 12px;
-    display:flex; flex-direction:column; align-items:center; gap:8px;
-    transition:all .15s;
+    display:flex; flex-direction:column; align-items:center; gap:8px; transition:all .15s;
   }
-  .skinCard.equipped {
-    border-color:#4a9dff; box-shadow:0 0 0 2px rgba(74,157,255,.4);
-  }
+  .skinCard.equipped { border-color:#4a9dff; box-shadow:0 0 0 2px rgba(74,157,255,.4); }
   .skinPreview {
-    width:52px; height:52px; border-radius:50%;
-    box-shadow:inset 0 -6px 12px rgba(0,0,0,.25);
+    width:70px; height:70px; border-radius:12px;
+    display:flex; align-items:center; justify-content:center;
+    font-size:32px; box-shadow:inset 0 -6px 12px rgba(0,0,0,.25);
   }
   .skinName { font-size:14px; font-weight:800; }
   .skinBtn {
     width:100%; padding:8px 4px; font-size:12px; font-weight:700;
     border:none; border-radius:8px; cursor:pointer;
-    background:linear-gradient(180deg,#4a9dff,#2070d0); color:#fff;
-    letter-spacing:1px;
+    background:linear-gradient(180deg,#4a9dff,#2070d0); color:#fff; letter-spacing:1px;
   }
-  .skinBtn:disabled {
-    background:rgba(255,255,255,.1); color:rgba(255,255,255,.5); cursor:default;
-  }
+  .skinBtn:disabled { background:rgba(255,255,255,.1); color:rgba(255,255,255,.5); cursor:default; }
   .clipsInfo { font-size:16px; font-weight:700; }
   .clipsInfo span { color:#ffc93c; }
 
@@ -116,7 +98,6 @@
   .infoBox .big { font-size:46px; font-weight:900; color:#ffc93c; line-height:1.1; }
   .infoBox .sub { font-size:14px; opacity:.75; margin-top:4px; }
 
-  /* HUD icons */
   .coinIcon { display:inline-block; width:14px; height:14px; border-radius:50%;
     background: radial-gradient(circle at 35% 35%, #ffe680, #ffc93c 60%, #b8860b);
     box-shadow: 0 0 0 1px #b8860b inset; vertical-align:middle; margin-right:3px; }
@@ -127,23 +108,14 @@
 <canvas id="game"></canvas>
 
 <div id="hud">
-  <div class="stat">
-    <div class="val" id="scoreVal">0</div>
-    <div class="lbl">PUNKTE</div>
-  </div>
-  <div class="stat mid">
-    <div class="val" id="clipVal">0</div>
-    <div class="lbl">CLIPS</div>
-  </div>
-  <div class="stat">
-    <div class="val" id="bestVal">0</div>
-    <div class="lbl">BEST</div>
-  </div>
+  <div class="stat"><div class="val" id="scoreVal">0</div><div class="lbl">PUNKTE</div></div>
+  <div class="stat mid"><div class="val" id="clipVal">0</div><div class="lbl">CLIPS</div></div>
+  <div class="stat"><div class="val" id="bestVal">0</div><div class="lbl">BEST</div></div>
 </div>
 
 <div id="menuScreen" class="screen">
   <h1>ENDLESS RUNNER</h1>
-  <p>Wähle deine Welt, sammle Clips und kaufe Skins.<br>
+  <p>Wähle deine Welt, sammle Clips und schalte neue Charaktere frei.<br>
      Weiche Hindernissen aus und entkomme deiner Verfolgerin!</p>
   <div class="menuBtns">
     <button class="btnMain" id="btnPlay">SPIELEN</button>
@@ -158,7 +130,7 @@
 </div>
 
 <div id="shopScreen" class="screen hidden">
-  <h2>SKIN SHOP</h2>
+  <h2>CHARAKTER SHOP</h2>
   <div class="clipsInfo">Deine Clips: <span id="shopClips">0</span> <span class="coinIcon"></span></div>
   <div id="skinGrid"></div>
   <button class="btnBack" data-back>ZURÜCK</button>
@@ -204,134 +176,152 @@ const JUMP_V    = 9.2;
 const SLIDE_T   = 0.62;
 const CAM_Z     = -7;
 const CAM_Y     = 2.4;
-const CHASER_Z  = -2.5;
 
 const TYPES = {
-  low:   { y0: 0,    h: 0.78, w: 1.55, depth: 0.8 },  // SPRINGEN
-  high:  { y0: 1.15, h: 1.5,  w: 1.55, depth: 0.8 },  // DUCKEN
-  block: { y0: 0,    h: 2.1,  w: 1.55, depth: 1.4 }   // AUSWEICHEN
+  low:   { y0: 0,    h: 0.78, w: 1.55, depth: 0.8 },
+  high:  { y0: 1.15, h: 1.5,  w: 1.55, depth: 0.8 },
+  block: { y0: 0,    h: 2.1,  w: 1.55, depth: 1.4 }
 };
 
 /* =========================================================
-   10 WELTEN
+   WELTEN – lange Ziele, unterschiedliche Hindernis-STYLES
    ========================================================= */
 const WORLDS = [
-  { name:'Neon City', goal: 300,
+  { name:'Neon City', goal: 1200, style:'neon',
     sky:['#0a0f24','#1a2550','#4a5fa8'], ground:['#1e2230','#080a10'],
     groundLine:'rgba(140,170,255,0.30)', dash:'rgba(200,215,255,0.42)',
+    parallax:{type:'stars', color:'rgba(200,220,255,', count:60},
     obstacle:{
-      low:  {front:'#ff5a3c', top:'#ff8f78', side:'#bd3720'},
-      high: {front:'#ffc93c', top:'#ffe38a', side:'#c3961f'},
-      block:{front:'#4a7dff', top:'#8aabff', side:'#2c53b8'}
-    }},
-  { name:'Tokyo', goal: 450,
+      low:{front:'#ff5a3c',top:'#ff8f78',side:'#bd3720'},
+      high:{front:'#ffc93c',top:'#ffe38a',side:'#c3961f'},
+      block:{front:'#4a7dff',top:'#8aabff',side:'#2c53b8'}}},
+
+  { name:'Tokyo', goal: 1800, style:'lantern',
     sky:['#1a0a2e','#3d1a5c','#8e4fa8'], ground:['#2a1a30','#0a0510'],
     groundLine:'rgba(255,100,200,0.35)', dash:'rgba(255,180,240,0.45)',
+    parallax:{type:'petals', color:'rgba(255,150,220,', count:30},
     obstacle:{
-      low:  {front:'#e63946', top:'#ff7b7b', side:'#a01f2e'},
-      high: {front:'#ffb703', top:'#ffd470', side:'#c08c00'},
-      block:{front:'#7209b7', top:'#b05de0', side:'#4a0575'}
-    }},
-  { name:'Wüste', goal: 600,
+      low:{front:'#c41e2e',top:'#ff4a5a',side:'#8a1020'},
+      high:{front:'#ffb703',top:'#ffd470',side:'#c08c00'},
+      block:{front:'#7209b7',top:'#b05de0',side:'#4a0575'}}},
+
+  { name:'Wüste', goal: 2500, style:'sandstone',
     sky:['#4a2818','#c47a3a','#f2c68a'], ground:['#d4a870','#6a4820'],
     groundLine:'rgba(255,220,160,0.35)', dash:'rgba(255,235,180,0.50)',
+    parallax:{type:'sun', color:'rgba(255,200,100,'},
     obstacle:{
-      low:  {front:'#d4741a', top:'#ffb060', side:'#a05010'},
-      high: {front:'#8a4a1a', top:'#b07040', side:'#5a2a0a'},
-      block:{front:'#4a8a3a', top:'#7ac060', side:'#2a5a1a'}
-    }},
-  { name:'Schnee', goal: 750,
+      low:{front:'#c47a2a',top:'#e8a860',side:'#8a5010'},
+      high:{front:'#8a5020',top:'#b07040',side:'#5a2a0a'},
+      block:{front:'#a06a30',top:'#c08a50',side:'#6a4010'}}},
+
+  { name:'Schnee', goal: 3300, style:'ice',
     sky:['#5a7aa8','#a8c0e0','#e8f0ff'], ground:['#e0e8f5','#8090a8'],
     groundLine:'rgba(200,220,255,0.5)', dash:'rgba(255,255,255,0.6)',
+    parallax:{type:'snow', color:'rgba(255,255,255,', count:70},
     obstacle:{
-      low:  {front:'#3a6ea5', top:'#5a8ec5', side:'#204a75'},
-      high: {front:'#e63946', top:'#ff7b7b', side:'#a01f2e'},
-      block:{front:'#f0f0f0', top:'#ffffff', side:'#a0a0a0'}
-    }},
-  { name:'Wald', goal: 900,
+      low:{front:'#a8d8ff',top:'#e8f8ff',side:'#6090c0'},
+      high:{front:'#e63946',top:'#ff7b7b',side:'#a01f2e'},
+      block:{front:'#c0e0ff',top:'#ffffff',side:'#80a0c0'}}},
+
+  { name:'Wald', goal: 4200, style:'wood',
     sky:['#2a4a1a','#4a7a2a','#8ab060'], ground:['#3a2a1a','#100810'],
     groundLine:'rgba(140,220,80,0.35)', dash:'rgba(200,255,120,0.45)',
+    parallax:{type:'leaves', color:'rgba(120,200,80,', count:40},
     obstacle:{
-      low:  {front:'#8b4513', top:'#b86530', side:'#5a2a08'},
-      high: {front:'#2e7d32', top:'#4caf50', side:'#1a4a1a'},
-      block:{front:'#6d4c41', top:'#8d6e63', side:'#3a2820'}
-    }},
-  { name:'Strand', goal: 1100,
+      low:{front:'#7a4a20',top:'#a06a30',side:'#4a2a08'},
+      high:{front:'#3a7a2a',top:'#60a040',side:'#1a4a1a'},
+      block:{front:'#6a4a30',top:'#8a6a50',side:'#3a2a1a'}}},
+
+  { name:'Strand', goal: 5200, style:'sand',
     sky:['#1a6a9a','#5aaee0','#b8e8ff'], ground:['#f0d880','#a08040'],
     groundLine:'rgba(255,255,200,0.4)', dash:'rgba(255,250,220,0.55)',
+    parallax:{type:'sun', color:'rgba(255,240,120,'},
     obstacle:{
-      low:  {front:'#e8a020', top:'#ffc050', side:'#a07010'},
-      high: {front:'#00a0c0', top:'#40d0f0', side:'#006080'},
-      block:{front:'#e63946', top:'#ff7b7b', side:'#a01f2e'}
-    }},
-  { name:'Vulkan', goal: 1300,
+      low:{front:'#e8c050',top:'#ffe080',side:'#a08020'},
+      high:{front:'#00a0c0',top:'#40d0f0',side:'#006080'},
+      block:{front:'#e8a020',top:'#ffc050',side:'#a07010'}}},
+
+  { name:'Vulkan', goal: 6300, style:'lava',
     sky:['#1a0505','#5a1010','#c03010'], ground:['#2a1010','#0a0505'],
     groundLine:'rgba(255,80,20,0.4)', dash:'rgba(255,140,60,0.55)',
+    parallax:{type:'embers', color:'rgba(255,150,50,', count:50},
     obstacle:{
-      low:  {front:'#ff4500', top:'#ff8060', side:'#a02500'},
-      high: {front:'#ffd700', top:'#fff060', side:'#a09000'},
-      block:{front:'#3a1a1a', top:'#6a3030', side:'#1a0a0a'}
-    }},
-  { name:'Weltraum', goal: 1500,
+      low:{front:'#3a1a1a',top:'#6a3030',side:'#1a0a0a'},
+      high:{front:'#ff4500',top:'#ff8060',side:'#a02500'},
+      block:{front:'#2a1010',top:'#4a2020',side:'#100505'}}},
+
+  { name:'Weltraum', goal: 7500, style:'asteroid',
     sky:['#050010','#1a0a3a','#3a2a6a'], ground:['#1a1a2a','#050510'],
     groundLine:'rgba(120,140,255,0.4)', dash:'rgba(180,200,255,0.5)',
+    parallax:{type:'stars', color:'rgba(200,200,255,', count:90},
     obstacle:{
-      low:  {front:'#8a20e0', top:'#b060ff', side:'#5a10a0'},
-      high: {front:'#20e0c0', top:'#60ffe0', side:'#10a090'},
-      block:{front:'#404060', top:'#707090', side:'#202030'}
-    }},
-  { name:'Süßes', goal: 1700,
+      low:{front:'#5a5a7a',top:'#8a8aa0',side:'#3a3a50'},
+      high:{front:'#20e0c0',top:'#60ffe0',side:'#10a090'},
+      block:{front:'#4a4a6a',top:'#7a7a90',side:'#2a2a3a'}}},
+
+  { name:'Süßes', goal: 8800, style:'candy',
     sky:['#ffb0d0','#ff80b0','#ffe0f0'], ground:['#ffd0e0','#a05080'],
     groundLine:'rgba(255,255,255,0.5)', dash:'rgba(255,200,240,0.6)',
+    parallax:{type:'bubbles', color:'rgba(255,200,240,', count:35},
     obstacle:{
-      low:  {front:'#ff4080', top:'#ff80b0', side:'#a02050'},
-      high: {front:'#40c0ff', top:'#80e0ff', side:'#2080a0'},
-      block:{front:'#a040ff', top:'#c080ff', side:'#6010a0'}
-    }},
-  { name:'Cyber', goal: 2000,
+      low:{front:'#ff4080',top:'#ff80b0',side:'#a02050'},
+      high:{front:'#40c0ff',top:'#80e0ff',side:'#2080a0'},
+      block:{front:'#a040ff',top:'#c080ff',side:'#6010a0'}}},
+
+  { name:'Cyber', goal: 10200, style:'cyber',
     sky:['#050015','#150040','#300080'], ground:['#0a0a1a','#000005'],
     groundLine:'rgba(0,255,255,0.5)', dash:'rgba(255,0,255,0.6)',
+    parallax:{type:'grid', color:'rgba(0,255,255,'},
     obstacle:{
-      low:  {front:'#00ffff', top:'#80ffff', side:'#0090a0'},
-      high: {front:'#ff00ff', top:'#ff80ff', side:'#a000a0'},
-      block:{front:'#ffff00', top:'#ffff80', side:'#a0a000'}
-    }}
+      low:{front:'#00a0b0',top:'#00ffff',side:'#006060'},
+      high:{front:'#a000a0',top:'#ff00ff',side:'#600060'},
+      block:{front:'#a0a000',top:'#ffff00',side:'#606000'}}}
 ];
 
 /* =========================================================
-   SKINS
+   CHARAKTERE (weiterhin 6 verschiedene)
    ========================================================= */
 const SKINS = [
-  { id:'default', name:'Klassisch', price:0,
-    colors:{shirt:'#ff6b35', shirtLight:'#ff8f5e', pants:'#2b2f45',
-            skin:'#f2c49b', hat:'#e63946', hatLight:'#ff6270', shoe:'#e9ecf5'}},
-  { id:'blue', name:'Blau', price:40,
-    colors:{shirt:'#4a7dff', shirtLight:'#7aa3ff', pants:'#1a2a5a',
-            skin:'#f2c49b', hat:'#1e3a99', hatLight:'#4060d0', shoe:'#e9ecf5'}},
-  { id:'green', name:'Grün', price:80,
-    colors:{shirt:'#4caf50', shirtLight:'#7ed080', pants:'#2a4a2a',
-            skin:'#f2c49b', hat:'#2e7d32', hatLight:'#5aa060', shoe:'#e9ecf5'}},
-  { id:'purple', name:'Lila', price:150,
-    colors:{shirt:'#9c27b0', shirtLight:'#c060d0', pants:'#3a1a4a',
-            skin:'#f2c49b', hat:'#6a1b9a', hatLight:'#a060d0', shoe:'#e9ecf5'}},
-  { id:'gold', name:'Gold', price:250,
-    colors:{shirt:'#ffc93c', shirtLight:'#ffe080', pants:'#8a6a10',
-            skin:'#f2c49b', hat:'#b8860b', hatLight:'#ffd700', shoe:'#fff8e0'}},
-  { id:'rainbow', name:'Regenbogen', price:500,
-    colors:{shirt:'#ff6b9d', shirtLight:'#ffb0d0', pants:'#4a2a8a',
-            skin:'#f2c49b', hat:'#00bcd4', hatLight:'#80ffff', shoe:'#ffffff'}}
+  { id:'classic', name:'Klassisch', price:0, emoji:'🧢',
+    config:{ style:'classic', hatType:'beanie', hair:'#5a3020',
+      colors:{ shirt:'#ff6b35', shirtLight:'#ff8f5e', pants:'#2b2f45',
+               skin:'#f2c49b', hat:'#e63946', hatLight:'#ff6270', shoe:'#e9ecf5' }}},
+  { id:'skater', name:'Skater', price:60, emoji:'🛹',
+    config:{ style:'skater', hatType:'cap', hair:'#3a2010', shorts:true,
+      colors:{ shirt:'#2c3e50', shirtLight:'#455a70', pants:'#4a5568',
+               skin:'#e8b98c', hat:'#e74c3c', hatLight:'#c0392b', shoe:'#f39c12' }}},
+  { id:'ninja', name:'Ninja', price:120, emoji:'🥷',
+    config:{ style:'ninja', hatType:'headband', hair:null,
+      colors:{ shirt:'#1a1a2e', shirtLight:'#2d2d4a', pants:'#0f0f1a',
+               skin:'#e8b98c', hat:'#16213e', hatLight:'#0f3460', shoe:'#1a1a2e' }}},
+  { id:'astro', name:'Astronaut', price:200, emoji:'🚀',
+    config:{ style:'astro', hatType:'helmet', hair:null,
+      colors:{ shirt:'#e8eef5', shirtLight:'#ffffff', pants:'#c8d0e0',
+               skin:'#f2c49b', hat:'#a0b0d0', hatLight:'#d0e0f5', shoe:'#8a9ab0' }}},
+  { id:'hero', name:'Superheld', price:320, emoji:'🦸',
+    config:{ style:'hero', hatType:'mask', hair:'#2a1a10', cape:'#ff3040',
+      colors:{ shirt:'#1e5fff', shirtLight:'#4a8fff', pants:'#0a3aa0',
+               skin:'#f2c49b', hat:'#ff3040', hatLight:'#ff6070', shoe:'#ff3040' }}},
+  { id:'king', name:'König', price:500, emoji:'👑',
+    config:{ style:'king', hatType:'crown', hair:'#3a2050', longHair:true, cape:'#8a20a0',
+      colors:{ shirt:'#8a20a0', shirtLight:'#c050d0', pants:'#5a1070',
+               skin:'#f2c49b', hat:'#ffd700', hatLight:'#fff060', shoe:'#8a6a10' }}}
 ];
+
+const CHASER_CONFIG = {
+  style:'girl', hatType:'none', hair:'#3a2050', longHair:true,
+  colors:{ shirt:'#ff4080', shirtLight:'#ff80b0', pants:'#7a2a8a',
+           skin:'#f2c49b', hat:'#ff80b0', hatLight:'#ffa0c0', shoe:'#ffffff' }
+};
 
 /* =========================================================
    SAVE
    ========================================================= */
-const SAVE_KEY = 'runner_save_v2';
-function defaultSave(){
-  return {
-    bestScore:0, clips:0, unlockedWorld:1,
-    ownedSkins:['default'], selectedSkin:'default', worldBest:{}
-  };
-}
+const SAVE_KEY = 'runner_save_v4';
+function defaultSave(){ return {
+  bestScore:0, clips:0, unlockedWorld:1,
+  ownedSkins:['classic'], selectedSkin:'classic', worldBest:{}
+};}
 function loadSave(){
   try {
     const s = JSON.parse(localStorage.getItem(SAVE_KEY));
@@ -340,9 +330,7 @@ function loadSave(){
   return defaultSave();
 }
 let save = loadSave();
-function persist(){
-  try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch(e) {}
-}
+function persist(){ try { localStorage.setItem(SAVE_KEY, JSON.stringify(save)); } catch(e) {} }
 
 /* =========================================================
    CANVAS & PROJEKTION
@@ -353,12 +341,9 @@ let W = 0, H = 0, DPR = 1, horizonY = 0, F = 600;
 
 function resize(){
   DPR = Math.min(window.devicePixelRatio || 1, 2);
-  W = window.innerWidth;
-  H = window.innerHeight;
-  canvas.width  = Math.round(W * DPR);
-  canvas.height = Math.round(H * DPR);
-  canvas.style.width  = W + 'px';
-  canvas.style.height = H + 'px';
+  W = window.innerWidth; H = window.innerHeight;
+  canvas.width = Math.round(W * DPR); canvas.height = Math.round(H * DPR);
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
   ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
   horizonY = H * 0.34;
   F = Math.min(H * 0.95, W * 1.25);
@@ -366,205 +351,435 @@ function resize(){
 window.addEventListener('resize', resize);
 
 function proj(x, y, z){
-  const depth = z - CAM_Z;
-  const s = F / depth;
+  const s = F / (z - CAM_Z);
   return { x: W/2 + (x - camX) * s, y: horizonY + (CAM_Y - y) * s, s };
 }
 function fillPoly(pts, color){
-  ctx.fillStyle = color;
+  ctx.fillStyle = color; ctx.beginPath();
+  ctx.moveTo(pts[0].x, pts[0].y);
+  for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
+  ctx.closePath(); ctx.fill();
+}
+function clipToPoly(pts, cb){
+  ctx.save();
   ctx.beginPath();
   ctx.moveTo(pts[0].x, pts[0].y);
   for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i].x, pts[i].y);
-  ctx.closePath();
-  ctx.fill();
+  ctx.closePath(); ctx.clip();
+  cb();
+  ctx.restore();
 }
 
 /* =========================================================
-   SPIELZUSTAND
+   STATE
    ========================================================= */
-let screen       = 'menu';
-let worldIndex   = 0;
-let currentGoal  = 300;
-let score        = 0;
-let speed        = 22;
-let distance     = 0;
-let animTime     = 0;
-let camX         = 0;
-let obstacles    = [];
-let clips        = [];
-let spawnT       = 0;
-let clipSpawnT   = 0;
-let clipsThisRun = 0;
-let gameOverFlag = false;
+let screen = 'menu';
+let worldIndex = 0, currentGoal = 1200;
+let score = 0, speed = 22, distance = 0, animTime = 0;
+let camX = 0;
+let obstacles = [], clips = [], particles = [];
+let spawnT = 0, clipSpawnT = 0, clipsThisRun = 0, gameOverFlag = false;
+let shakeT = 0, shakeAmp = 0;
+let blinkTimer = 2.5, blinkAmt = 1;
 
-const player = {
-  lane:1, x:0, y:0, vy:0,
-  jumping:false, sliding:false, slideT:0
-};
+const player = { lane:1, x:0, y:0, vy:0, jumping:false, sliding:false, slideT:0 };
 
 /* =========================================================
-   CHARAKTER-ZEICHNUNG (mit Animation)
+   ZEICHEN-FUNKTION – mit Kniegelenken & Blinzeln
    ========================================================= */
-function drawCharacter(u, opts){
-  const C = opts.colors;
+function drawCharacter(c, u, opts){
+  const cfg = opts.config;
+  const C   = cfg.colors;
+  const style = cfg.style || 'classic';
   const phase = opts.phase || 0;
-  const jumping = opts.jumping;
-  const sliding = opts.sliding;
+  const jump = opts.jumping || false;
+  const slide = opts.sliding || false;
   const s = u;
 
-  // Bob beim Laufen
-  const bob = (jumping || sliding) ? 0 : Math.abs(Math.sin(phase)) * 0.05;
+  const bob = (jump || slide) ? 0 : Math.abs(Math.sin(phase)) * 0.05;
   const bobY = -bob * s;
+  const tilt = (jump || slide) ? 0 : Math.sin(phase) * 0.05;
 
-  const hipY   = -0.62 * s + bobY;
-  const legLen = 0.55 * s;
-  const legW   = 0.17 * s;
-
-  let legSwing = 0;
-  if (!jumping && !sliding) legSwing = Math.sin(phase) * 0.45;
-  else if (jumping) legSwing = -0.55;
-
-  // --- Beine ---
-  ctx.save();
-  ctx.translate(-0.11 * s, hipY);
-  ctx.rotate(legSwing);
-  ctx.fillStyle = C.pants;
-  ctx.fillRect(-legW/2, 0, legW, legLen);
-  ctx.fillStyle = C.shoe;
-  ctx.fillRect(-legW/2 - 0.03*s, legLen - 0.1*s, legW + 0.06*s, 0.12*s);
-  ctx.restore();
-
-  ctx.save();
-  ctx.translate(0.11 * s, hipY);
-  ctx.rotate(-legSwing);
-  ctx.fillStyle = C.pants;
-  ctx.fillRect(-legW/2, 0, legW, legLen);
-  ctx.fillStyle = C.shoe;
-  ctx.fillRect(-legW/2 - 0.03*s, legLen - 0.1*s, legW + 0.06*s, 0.12*s);
-  ctx.restore();
-
-  // --- Körper ---
-  const bodyBot = hipY;
-  const bodyH   = 0.7 * s;
-  const bodyTop = bodyBot - bodyH;
-  ctx.fillStyle = C.shirt;
-  ctx.fillRect(-0.28*s, bodyTop, 0.56*s, bodyH);
-  ctx.fillStyle = C.shirtLight;
-  ctx.fillRect(-0.28*s, bodyTop, 0.56*s, 0.08*s);
-
-  // --- Arme ---
-  const shoulderY = bodyTop + 0.06 * s;
-  const armLen    = 0.42 * s;
-  const armW      = 0.11 * s;
-
-  let armSwing = 0;
-  if (!jumping && !sliding) armSwing = -Math.sin(phase) * 0.55;
-  else if (jumping)          armSwing = 0.7;
-  else if (sliding)          armSwing = -0.4;
-
-  ctx.save();
-  ctx.translate(-0.28*s, shoulderY);
-  ctx.rotate(-armSwing);
-  ctx.fillStyle = C.shirt;
-  ctx.fillRect(-armW/2, 0, armW, armLen);
-  ctx.fillStyle = C.skin;
-  ctx.fillRect(-armW/2, armLen, armW, 0.09*s);
-  ctx.restore();
-
-  ctx.save();
-  ctx.translate(0.28*s, shoulderY);
-  ctx.rotate(armSwing);
-  ctx.fillStyle = C.shirt;
-  ctx.fillRect(-armW/2, 0, armW, armLen);
-  ctx.fillStyle = C.skin;
-  ctx.fillRect(-armW/2, armLen, armW, 0.09*s);
-  ctx.restore();
-
-  // --- Kopf ---
-  const neckY  = bodyTop - 0.02 * s;
-  const headY  = neckY - 0.22 * s;
-  const headR  = 0.2 * s;
-
-  ctx.fillStyle = C.skin;
-  ctx.fillRect(-0.06*s, neckY - 0.03*s, 0.12*s, 0.08*s);
-
-  ctx.beginPath();
-  ctx.arc(0, headY, headR, 0, Math.PI * 2);
-  ctx.fillStyle = C.skin;
-  ctx.fill();
-
-  // Haare
-  if (opts.hair){
-    ctx.fillStyle = opts.hair;
-    ctx.beginPath();
-    ctx.arc(0, headY - 0.03*s, headR * 1.05, Math.PI, Math.PI * 2);
-    ctx.fill();
-    ctx.fillRect(-headR - 0.02*s, headY - 0.03*s, 0.06*s, 0.42*s);
-    ctx.fillRect( headR - 0.04*s, headY - 0.03*s, 0.06*s, 0.42*s);
+  // CAPE hinten
+  if (cfg.cape){
+    c.save();
+    const wave = Math.sin(phase * 0.7) * 0.08 * s;
+    c.fillStyle = cfg.cape;
+    const sX = -0.12*s, sY = -1.3*s + bobY;
+    c.beginPath();
+    c.moveTo(sX, sY);
+    c.quadraticCurveTo(sX - 0.45*s + wave, sY + 0.4*s,
+                       sX - 0.6*s + wave*1.5, sY + 0.85*s);
+    c.lineTo(sX - 0.32*s, sY + 0.95*s);
+    c.quadraticCurveTo(sX - 0.15*s + wave*0.5, sY + 0.5*s, sX + 0.15*s, sY);
+    c.closePath(); c.fill();
+    c.fillStyle = 'rgba(255,255,255,0.18)';
+    c.beginPath();
+    c.moveTo(sX - 0.05*s, sY + 0.05*s);
+    c.quadraticCurveTo(sX - 0.28*s + wave, sY + 0.4*s,
+                       sX - 0.4*s + wave*1.2, sY + 0.75*s);
+    c.lineTo(sX - 0.28*s, sY + 0.78*s);
+    c.quadraticCurveTo(sX - 0.15*s, sY + 0.4*s, sX + 0.02*s, sY + 0.05*s);
+    c.closePath(); c.fill();
+    c.restore();
   }
 
-  // Augen
-  ctx.fillStyle = '#171a22';
-  ctx.beginPath();
-  ctx.arc(-0.075*s, headY - 0.02*s, 0.028*s, 0, Math.PI*2);
-  ctx.arc( 0.075*s, headY - 0.02*s, 0.028*s, 0, Math.PI*2);
-  ctx.fill();
+  // BEINE mit Kniegelenk
+  const hipY = (cfg.shorts ? -0.45 : -0.62) * s + bobY;
+  const legLen = (cfg.shorts ? 0.35 : 0.55) * s;
+  const legW = 0.15 * s;
+  let legSwing = 0;
+  if (!jump && !slide) legSwing = Math.sin(phase) * 0.55;
+  else if (jump) legSwing = -0.55;
 
-  // Hut
-  if (C.hat){
-    const hatBaseY = headY - 0.15 * s;
-    ctx.fillStyle = C.hat;
-    ctx.fillRect(-0.28*s, hatBaseY - 0.05*s, 0.56*s, 0.07*s);
-    ctx.fillRect(-0.22*s, hatBaseY - 0.22*s, 0.44*s, 0.18*s);
-    ctx.fillStyle = C.hatLight || C.hat;
-    ctx.fillRect(-0.22*s, hatBaseY - 0.22*s, 0.44*s, 0.035*s);
+  for (const side of [-1, 1]){
+    c.save();
+    c.translate(side * 0.11 * s, hipY);
+    c.rotate(-side * legSwing);
+    // Oberschenkel
+    c.fillStyle = C.pants;
+    c.fillRect(-legW/2, 0, legW, legLen * 0.55);
+    // Kniegelenk
+    const kneeBend = Math.max(0, -side * legSwing) * 1.1;
+    c.translate(0, legLen * 0.55);
+    c.rotate(side * kneeBend);
+    // Unterschenkel
+    c.fillStyle = C.pants;
+    c.fillRect(-legW/2, 0, legW, legLen * 0.48);
+    // Schuh
+    c.fillStyle = C.shoe;
+    c.fillRect(-legW/2 - 0.035*s, legLen * 0.48 - 0.06*s, legW + 0.07*s, 0.12*s);
+    c.restore();
+  }
+
+  // KÖRPER (mit leichter Neigung)
+  c.save();
+  c.rotate(tilt);
+  const bodyBot = hipY;
+  const bodyH = 0.7 * s;
+  const bodyTop = bodyBot - bodyH;
+
+  c.fillStyle = C.shirt;
+  c.fillRect(-0.28*s, bodyTop, 0.56*s, bodyH);
+  // Highlight
+  c.fillStyle = C.shirtLight;
+  c.fillRect(-0.28*s, bodyTop, 0.56*s, 0.08*s);
+  // Schattenkante
+  c.fillStyle = 'rgba(0,0,0,0.15)';
+  c.fillRect(0.20*s, bodyTop + 0.1*s, 0.08*s, bodyH - 0.1*s);
+
+  if (style === 'ninja'){
+    c.fillStyle = '#000';
+    c.fillRect(-0.29*s, bodyBot - 0.15*s, 0.58*s, 0.06*s);
+  } else if (style === 'hero'){
+    c.fillStyle = C.hat;
+    c.beginPath(); c.arc(0, bodyTop + bodyH*0.35, 0.11*s, 0, Math.PI*2); c.fill();
+    c.fillStyle = C.shirtLight;
+    c.beginPath(); c.arc(0, bodyTop + bodyH*0.35, 0.06*s, 0, Math.PI*2); c.fill();
+  } else if (style === 'king'){
+    c.fillStyle = C.hat;
+    c.fillRect(-0.28*s, bodyBot - 0.08*s, 0.56*s, 0.08*s);
+    for (let i = 0; i < 3; i++){
+      c.beginPath(); c.arc(0, bodyTop + 0.16*s + i*0.18*s, 0.028*s, 0, Math.PI*2); c.fill();
+    }
+  } else if (style === 'astro'){
+    c.fillStyle = '#2a4a7a';
+    c.fillRect(-0.1*s, bodyTop + 0.2*s, 0.2*s, 0.15*s);
+    c.fillStyle = '#4aff4a';
+    c.fillRect(-0.05*s, bodyTop + 0.25*s, 0.1*s, 0.05*s);
+  } else if (style === 'skater'){
+    c.strokeStyle = C.shirtLight;
+    c.lineWidth = 0.015*s;
+    c.beginPath();
+    c.moveTo(-0.08*s, bodyTop + 0.05*s); c.lineTo(-0.08*s, bodyTop + 0.2*s);
+    c.moveTo( 0.08*s, bodyTop + 0.05*s); c.lineTo( 0.08*s, bodyTop + 0.2*s);
+    c.stroke();
+  } else if (style === 'girl'){
+    c.fillStyle = C.shirtLight;
+    c.beginPath();
+    c.moveTo(-0.28*s, bodyBot - 0.15*s); c.lineTo(-0.35*s, bodyBot);
+    c.lineTo(0.35*s, bodyBot); c.lineTo(0.28*s, bodyBot - 0.15*s);
+    c.closePath(); c.fill();
+  }
+  c.restore();
+
+  // ARME
+  const shoulderY = bodyTop + 0.06 * s;
+  const armLen = 0.42 * s;
+  const armW = 0.11 * s;
+  let armSwing = 0;
+  if (!jump && !slide) armSwing = -Math.sin(phase) * 0.55;
+  else if (jump) armSwing = 0.7;
+  else if (slide) armSwing = -0.4;
+
+  for (const side of [-1, 1]){
+    c.save();
+    c.translate(side * 0.28 * s, shoulderY);
+    c.rotate(side * armSwing);
+    c.fillStyle = C.shirt;
+    c.fillRect(-armW/2, 0, armW, armLen);
+    c.fillStyle = C.skin;
+    c.fillRect(-armW/2, armLen, armW, 0.09*s);
+    c.restore();
+  }
+
+  // HALS
+  const neckY = bodyTop - 0.02 * s;
+  c.fillStyle = C.skin;
+  c.fillRect(-0.06*s, neckY - 0.03*s, 0.12*s, 0.08*s);
+
+  // KOPF (mit leichtem Nicken)
+  const headY = neckY - 0.22 * s;
+  const headR = 0.2 * s;
+  c.beginPath();
+  c.arc(0, headY, headR, 0, Math.PI * 2);
+  c.fillStyle = (style === 'ninja') ? '#1a1a2e' : C.skin;
+  c.fill();
+
+  // Lange Haare mit Schwung
+  if (cfg.longHair && cfg.hair){
+    const hairWave = Math.sin(phase * 0.8) * 0.05 * s;
+    c.fillStyle = cfg.hair;
+    c.beginPath();
+    c.moveTo(-headR - 0.02*s, headY - 0.05*s);
+    c.lineTo(-headR - 0.12*s + hairWave, headY + 0.55*s);
+    c.lineTo(-headR + 0.06*s, headY + 0.62*s);
+    c.lineTo(-headR + 0.03*s, headY);
+    c.closePath(); c.fill();
+    c.beginPath();
+    c.moveTo(headR + 0.02*s, headY - 0.05*s);
+    c.lineTo(headR + 0.12*s + hairWave, headY + 0.55*s);
+    c.lineTo(headR - 0.06*s, headY + 0.62*s);
+    c.lineTo(headR - 0.03*s, headY);
+    c.closePath(); c.fill();
+  }
+
+  // Kurze Haare
+  if (cfg.hair && style !== 'ninja' && !cfg.longHair){
+    c.fillStyle = cfg.hair;
+    c.beginPath(); c.arc(0, headY - 0.03*s, headR * 1.05, Math.PI, Math.PI * 2); c.fill();
+    c.fillRect(-headR - 0.02*s, headY - 0.03*s, 0.06*s, 0.15*s);
+    c.fillRect( headR - 0.04*s, headY - 0.03*s, 0.06*s, 0.15*s);
+  }
+
+  // AUGEN (mit Blinzeln)
+  const eh = headR * 0.14 * blinkAmt;
+  if (style === 'ninja'){
+    c.fillStyle = '#e0e8f0';
+    c.beginPath(); c.arc(-0.075*s, headY - 0.02*s, 0.032*s, 0, Math.PI*2);
+    c.arc( 0.075*s, headY - 0.02*s, 0.032*s, 0, Math.PI*2); c.fill();
+    c.fillStyle = '#171a22';
+    c.beginPath(); c.arc(-0.075*s, headY - 0.02*s, 0.015*s, 0, Math.PI*2);
+    c.arc( 0.075*s, headY - 0.02*s, 0.015*s, 0, Math.PI*2); c.fill();
+    c.fillStyle = '#0a0a15';
+    c.fillRect(-headR, headY - 0.02*s, headR*2, 0.18*s);
+  } else if (style === 'hero'){
+    c.fillStyle = C.hat;
+    c.fillRect(-headR*0.95, headY - headR*0.42, headR*1.9, headR*0.55);
+    c.fillStyle = '#ffffff';
+    c.beginPath();
+    c.ellipse(-headR*0.4, headY - headR*0.15, headR*0.22, headR*0.13, 0, 0, Math.PI*2);
+    c.ellipse( headR*0.4, headY - headR*0.15, headR*0.22, headR*0.13, 0, 0, Math.PI*2);
+    c.fill();
+    c.fillStyle = '#171a22';
+    c.beginPath();
+    c.arc(-headR*0.4, headY - headR*0.15, headR*0.08, 0, Math.PI*2);
+    c.arc( headR*0.4, headY - headR*0.15, headR*0.08, 0, Math.PI*2); c.fill();
+  } else {
+    c.fillStyle = '#171a22';
+    c.beginPath();
+    c.ellipse(-0.075*s, headY - 0.02*s, 0.028*s, eh, 0, 0, Math.PI*2);
+    c.ellipse( 0.075*s, headY - 0.02*s, 0.028*s, eh, 0, 0, Math.PI*2);
+    c.fill();
+  }
+
+  drawHeadwear(c, s, headY, headR, cfg);
+}
+
+function drawHeadwear(c, s, headY, headR, cfg){
+  const C = cfg.colors;
+  const hatY = headY - headR * 0.9;
+  switch (cfg.hatType){
+    case 'beanie':
+      c.fillStyle = C.hat;
+      c.fillRect(-headR*1.05, hatY - 0.02*s, headR*2.1, 0.08*s);
+      c.fillRect(-headR*0.85, hatY - 0.25*s, headR*1.7, 0.25*s);
+      c.fillStyle = C.hatLight;
+      c.fillRect(-headR*0.85, hatY - 0.25*s, headR*1.7, 0.04*s);
+      c.beginPath(); c.arc(0, hatY - 0.28*s, 0.05*s, 0, Math.PI*2);
+      c.fillStyle = C.hatLight; c.fill(); break;
+    case 'cap':
+      c.fillStyle = C.hat;
+      c.beginPath(); c.arc(0, hatY + 0.05*s, headR*1.05, Math.PI, Math.PI*2); c.fill();
+      c.fillRect(-headR*1.05, hatY, headR*2.1, 0.06*s);
+      c.fillStyle = C.hatLight;
+      c.fillRect(-headR*1.25, hatY - 0.02*s, headR*0.42, 0.1*s);
+      c.fillRect( headR*0.83, hatY - 0.02*s, headR*0.42, 0.1*s); break;
+    case 'crown':
+      c.fillStyle = C.hat;
+      c.fillRect(-headR*0.95, hatY - 0.05*s, headR*1.9, 0.12*s);
+      for (let i = 0; i < 5; i++){
+        const x = -headR*0.95 + i * (headR*1.9/4);
+        c.beginPath();
+        c.moveTo(x - 0.04*s, hatY - 0.05*s);
+        c.lineTo(x, hatY - 0.24*s);
+        c.lineTo(x + 0.04*s, hatY - 0.05*s);
+        c.closePath(); c.fill();
+      }
+      c.fillStyle = '#ff2050';
+      c.beginPath(); c.arc(0, hatY + 0.01*s, 0.04*s, 0, Math.PI*2); c.fill();
+      c.fillStyle = '#40d0ff';
+      c.beginPath();
+      c.arc(-headR*0.6, hatY + 0.01*s, 0.028*s, 0, Math.PI*2);
+      c.arc( headR*0.6, hatY + 0.01*s, 0.028*s, 0, Math.PI*2); c.fill(); break;
+    case 'helmet':
+      c.strokeStyle = 'rgba(200,220,255,0.8)';
+      c.lineWidth = 0.03*s;
+      c.beginPath(); c.arc(0, headY, headR*1.3, 0, Math.PI*2); c.stroke();
+      c.fillStyle = 'rgba(150,200,255,0.18)';
+      c.beginPath(); c.arc(0, headY, headR*1.3, 0, Math.PI*2); c.fill();
+      c.strokeStyle = 'rgba(255,255,255,0.85)';
+      c.lineWidth = 0.02*s;
+      c.beginPath(); c.arc(0, headY, headR*1.22, -Math.PI*0.8, -Math.PI*0.4); c.stroke();
+      c.fillStyle = C.hat;
+      c.fillRect(-headR*1.3, headY + headR*0.85, headR*2.6, 0.06*s); break;
+    case 'headband':
+      c.fillStyle = C.hat;
+      c.fillRect(-headR*1.05, hatY + 0.08*s, headR*2.1, 0.08*s);
+      c.beginPath();
+      c.moveTo(-headR*1.0, hatY + 0.1*s);
+      c.quadraticCurveTo(-headR*1.4, hatY + 0.3*s, -headR*1.6, hatY + 0.5*s);
+      c.lineTo(-headR*1.48, hatY + 0.55*s);
+      c.quadraticCurveTo(-headR*1.2, hatY + 0.35*s, -headR*0.9, hatY + 0.15*s);
+      c.closePath(); c.fill();
+      c.fillStyle = '#a0a0a0';
+      c.fillRect(-0.06*s, hatY + 0.06*s, 0.12*s, 0.09*s); break;
+    case 'mask': break;
+    default: break;
   }
 }
 
 /* =========================================================
-   RENDERING
+   PARALLAX HINTERGRUND (Sterne, Blüten, Schnee...)
+   ========================================================= */
+let parallaxItems = [];
+function initParallax(){
+  const w = WORLDS[worldIndex];
+  const p = w.parallax;
+  parallaxItems = [];
+  if (!p) return;
+  const count = p.count || 40;
+  for (let i = 0; i < count; i++){
+    parallaxItems.push({
+      x: Math.random() * W,
+      y: Math.random() * horizonY,
+      s: 0.5 + Math.random() * 1.5,
+      v: 5 + Math.random() * 25,
+      tw: Math.random() * Math.PI * 2
+    });
+  }
+}
+
+function updateParallax(dt){
+  const p = WORLDS[worldIndex].parallax;
+  if (!p) return;
+  for (const it of parallaxItems){
+    it.tw += dt * 2;
+    if (p.type === 'petals' || p.type === 'leaves' || p.type === 'snow' || p.type === 'embers' || p.type === 'bubbles'){
+      it.y += it.v * dt * 0.6;
+      it.x += Math.sin(it.tw) * 12 * dt;
+      if (it.y > horizonY){ it.y = -5; it.x = Math.random() * W; }
+    }
+  }
+}
+
+function drawParallax(){
+  const w = WORLDS[worldIndex];
+  const p = w.parallax;
+  if (!p) return;
+  ctx.save();
+  for (const it of parallaxItems){
+    const alpha = (p.type === 'stars') ? 0.4 + Math.sin(it.tw) * 0.4 : 0.7;
+    const col = p.color + alpha + ')';
+    switch (p.type){
+      case 'stars':
+        ctx.fillStyle = col;
+        ctx.beginPath(); ctx.arc(it.x, it.y, it.s, 0, Math.PI*2); ctx.fill();
+        break;
+      case 'snow':
+        ctx.fillStyle = col;
+        ctx.beginPath(); ctx.arc(it.x, it.y, it.s, 0, Math.PI*2); ctx.fill();
+        break;
+      case 'petals':
+      case 'leaves':
+        ctx.fillStyle = col;
+        ctx.beginPath();
+        ctx.ellipse(it.x, it.y, it.s * 1.5, it.s * 0.8, it.tw, 0, Math.PI*2);
+        ctx.fill();
+        break;
+      case 'embers':
+      case 'bubbles':
+        ctx.fillStyle = col;
+        ctx.beginPath(); ctx.arc(it.x, it.y, it.s, 0, Math.PI*2); ctx.fill();
+        break;
+      case 'sun':
+        ctx.fillStyle = col + '0.5)';
+        ctx.beginPath(); ctx.arc(W * 0.75, horizonY * 0.4, 40 + Math.sin(animTime) * 3, 0, Math.PI*2); ctx.fill();
+        break;
+      case 'grid':
+        ctx.strokeStyle = col + '0.15)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < 8; i++){
+          ctx.beginPath();
+          ctx.moveTo(i * W/8, horizonY);
+          ctx.lineTo(W/2 + (i * W/8 - W/2) * 2.5, horizonY - horizonY);
+          ctx.stroke();
+        }
+        break;
+    }
+  }
+  ctx.restore();
+}
+
+/* =========================================================
+   RENDERING – Hintergrund / Boden
    ========================================================= */
 function getWorld(){ return WORLDS[worldIndex] || WORLDS[0]; }
 
 function drawGround(){
   const w = getWorld();
-
   const sky = ctx.createLinearGradient(0, 0, 0, horizonY + 60);
-  sky.addColorStop(0,    w.sky[0]);
-  sky.addColorStop(0.55, w.sky[1]);
-  sky.addColorStop(1,    w.sky[2]);
-  ctx.fillStyle = sky;
-  ctx.fillRect(0, 0, W, horizonY + 2);
+  sky.addColorStop(0, w.sky[0]); sky.addColorStop(0.55, w.sky[1]);
+  sky.addColorStop(1, w.sky[2]);
+  ctx.fillStyle = sky; ctx.fillRect(0, 0, W, horizonY + 2);
+
+  drawParallax();
 
   const gr = ctx.createLinearGradient(0, horizonY, 0, H);
-  gr.addColorStop(0, w.ground[0]);
-  gr.addColorStop(1, w.ground[1]);
-  ctx.fillStyle = gr;
-  ctx.fillRect(0, horizonY, W, H - horizonY);
+  gr.addColorStop(0, w.ground[0]); gr.addColorStop(1, w.ground[1]);
+  ctx.fillStyle = gr; ctx.fillRect(0, horizonY, W, H - horizonY);
 
   const glow = ctx.createLinearGradient(0, horizonY - 70, 0, horizonY + 8);
   glow.addColorStop(0, 'rgba(255,255,255,0)');
   glow.addColorStop(1, w.groundLine);
-  ctx.fillStyle = glow;
-  ctx.fillRect(0, horizonY - 70, W, 80);
+  ctx.fillStyle = glow; ctx.fillRect(0, horizonY - 70, W, 80);
 
   for (const lx of [-2.62, 2.62]){
     fillPoly([
-      proj(lx - 0.07, 0, -5), proj(lx + 0.07, 0, -5),
-      proj(lx + 0.07, 0, 140), proj(lx - 0.07, 0, 140)
+      proj(lx-0.07, 0, -5), proj(lx+0.07, 0, -5),
+      proj(lx+0.07, 0, 140), proj(lx-0.07, 0, 140)
     ], w.groundLine);
   }
 
   const period = 7, dashLen = 3.2;
   let z0 = -(distance % period);
   while (z0 < 130){
-    const za = Math.max(z0, -5);
-    const zb = Math.min(z0 + dashLen, 130);
+    const za = Math.max(z0, -5), zb = Math.min(z0 + dashLen, 130);
     if (zb > za + 0.01){
       for (const lx of [-0.85, 0.85]){
         fillPoly([
-          proj(lx - 0.045, 0, za), proj(lx + 0.045, 0, za),
-          proj(lx + 0.045, 0, zb), proj(lx - 0.045, 0, zb)
+          proj(lx-0.045,0,za), proj(lx+0.045,0,za),
+          proj(lx+0.045,0,zb), proj(lx-0.045,0,zb)
         ], w.dash);
       }
     }
@@ -572,87 +787,362 @@ function drawGround(){
   }
 }
 
-function drawBox(cx, z, w, h, y0, depth, colors){
-  const nz = z - depth/2, fz = z + depth/2;
+/* =========================================================
+   HINDERNIS-RENDERING – mit Welt-spezifischen STYLES
+   ========================================================= */
+function drawObstacleStyled(o, type, worldIdx){
+  const w = WORLDS[worldIdx];
+  const nz = o.z - o.depth/2, fz = o.z + o.depth/2;
   if (nz - CAM_Z < 1.5) return;
 
-  const x1 = cx - w/2, x2 = cx + w/2;
-  const y1 = y0,       y2 = y0 + h;
+  const x1 = o.x - o.w/2, x2 = o.x + o.w/2;
+  const y1 = o.y0, y2 = o.y0 + o.h;
 
   const p = [
-    proj(x1, y2, nz), proj(x2, y2, nz),
-    proj(x2, y1, nz), proj(x1, y1, nz),
-    proj(x1, y2, fz), proj(x2, y2, fz),
-    proj(x2, y1, fz), proj(x1, y1, fz)
+    proj(x1,y2,nz), proj(x2,y2,nz), proj(x2,y1,nz), proj(x1,y1,nz),
+    proj(x1,y2,fz), proj(x2,y2,fz), proj(x2,y1,fz), proj(x1,y1,fz)
   ];
 
-  if (CAM_Y > y2) fillPoly([p[0],p[1],p[5],p[4]], colors.top);
-  if (camX < x1) fillPoly([p[0],p[4],p[7],p[3]], colors.side);
-  if (camX > x2) fillPoly([p[1],p[5],p[6],p[2]], colors.side);
-  fillPoly([p[0],p[1],p[2],p[3]], colors.front);
-}
-function drawObstacle(o){ drawBox(o.x, o.z, o.w, o.h, o.y0, o.depth, o.colors); }
+  const pulse = 0.85 + Math.sin(animTime * 4 + o.z * 0.2) * 0.15;
 
+  // Basis-Box mit Gradienten
+  if (CAM_Y > y2){
+    const tg = ctx.createLinearGradient(p[4].x, p[4].y, p[0].x, p[0].y);
+    tg.addColorStop(0, o.colors.top);
+    tg.addColorStop(1, o.colors.front);
+    fillPoly([p[0],p[1],p[5],p[4]], tg);
+  }
+  if (camX < x1) fillPoly([p[0],p[4],p[7],p[3]], o.colors.side);
+  if (camX > x2) fillPoly([p[1],p[5],p[6],p[2]], o.colors.side);
+
+  const fg = ctx.createLinearGradient(p[0].x, p[0].y, p[2].x, p[2].y);
+  fg.addColorStop(0, o.colors.front);
+  fg.addColorStop(1, o.colors.side);
+  fillPoly([p[0],p[1],p[2],p[3]], fg);
+
+  // Welt-spezifische Dekoration auf Frontfläche
+  clipToPoly([p[0],p[1],p[2],p[3]], () => {
+    const fx0 = p[3].x, fy0 = p[0].y;
+    const fw = p[1].x - p[0].x;
+    const fh = p[2].y - p[0].y;
+    const style = w.style;
+
+    if (style === 'neon'){
+      // Leuchtende Kanten + Puls-Rahmen
+      ctx.strokeStyle = 'rgba(255,255,255,0.9)';
+      ctx.lineWidth = Math.max(2, fw * 0.05);
+      ctx.strokeRect(fx0 + fw*0.15, fy0 + fh*0.15, fw*0.7, fh*0.7);
+      ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+      ctx.lineWidth = Math.max(1, fw * 0.02);
+      ctx.strokeRect(fx0 + fw*0.28, fy0 + fh*0.28, fw*0.44, fh*0.44);
+
+    } else if (style === 'lantern'){
+      // Rote Laternen-Bänder
+      const bands = 3;
+      for (let i = 0; i < bands; i++){
+        ctx.fillStyle = i % 2 === 0 ? 'rgba(0,0,0,0.35)' : 'rgba(255,220,150,0.35)';
+        const bh = fh / bands;
+        ctx.fillRect(fx0, fy0 + i * bh, fw, bh * 0.45);
+      }
+      // Goldene Mitte
+      ctx.fillStyle = 'rgba(255,200,80,0.8)';
+      ctx.beginPath();
+      ctx.arc(fx0 + fw*0.5, fy0 + fh*0.5, fw * 0.2, 0, Math.PI*2);
+      ctx.fill();
+
+    } else if (style === 'sandstone'){
+      // Sediment-Schichten
+      const layers = 5;
+      for (let i = 1; i < layers; i++){
+        ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+        ctx.lineWidth = Math.max(1, fh * 0.012);
+        ctx.beginPath();
+        ctx.moveTo(fx0, fy0 + i * fh / layers);
+        ctx.lineTo(fx0 + fw, fy0 + i * fh / layers + Math.sin(i) * 2);
+        ctx.stroke();
+      }
+      // Risse
+      ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+      ctx.lineWidth = Math.max(1, fw * 0.015);
+      ctx.beginPath();
+      ctx.moveTo(fx0 + fw*0.3, fy0 + fh*0.2);
+      ctx.lineTo(fx0 + fw*0.4, fy0 + fh*0.5);
+      ctx.lineTo(fx0 + fw*0.35, fy0 + fh*0.75);
+      ctx.stroke();
+
+    } else if (style === 'ice'){
+      // Glitzer + weiße Spitze
+      ctx.fillStyle = 'rgba(255,255,255,0.6)';
+      for (let i = 0; i < 8; i++){
+        const px = fx0 + (i * 0.11 + 0.05) * fw;
+        const py = fy0 + (Math.sin(i * 1.7) * 0.5 + 0.5) * fh * 0.9;
+        ctx.beginPath();
+        ctx.arc(px, py, fw * 0.02, 0, Math.PI*2);
+        ctx.fill();
+      }
+      // Frost oben
+      const frost = ctx.createLinearGradient(0, fy0, 0, fy0 + fh * 0.3);
+      frost.addColorStop(0, 'rgba(255,255,255,0.6)');
+      frost.addColorStop(1, 'rgba(255,255,255,0)');
+      ctx.fillStyle = frost;
+      ctx.fillRect(fx0, fy0, fw, fh * 0.3);
+      // Kristallkanten
+      ctx.strokeStyle = 'rgba(180,230,255,0.7)';
+      ctx.lineWidth = Math.max(1, fw * 0.02);
+      ctx.beginPath();
+      ctx.moveTo(fx0, fy0); ctx.lineTo(fx0 + fw*0.3, fy0 + fh*0.4);
+      ctx.lineTo(fx0 + fw*0.1, fy0 + fh); ctx.stroke();
+
+    } else if (style === 'wood'){
+      // Senkrechte Maserung
+      for (let i = 0; i < 5; i++){
+        ctx.strokeStyle = 'rgba(0,0,0,0.25)';
+        ctx.lineWidth = Math.max(1, fw * 0.012);
+        const x = fx0 + (i + 0.5) * fw / 5;
+        ctx.beginPath();
+        ctx.moveTo(x, fy0);
+        for (let j = 1; j <= 6; j++){
+          ctx.lineTo(x + Math.sin(j + i) * fw * 0.02, fy0 + j * fh / 6);
+        }
+        ctx.stroke();
+      }
+      // Jahresringe-Knoten
+      ctx.fillStyle = 'rgba(0,0,0,0.3)';
+      for (let i = 0; i < 2; i++){
+        ctx.beginPath();
+        ctx.arc(fx0 + fw*(0.3 + i*0.4), fy0 + fh*0.3, fw*0.04, 0, Math.PI*2);
+        ctx.fill();
+      }
+
+    } else if (style === 'sand'){
+      // Sandkörner
+      ctx.fillStyle = 'rgba(0,0,0,0.2)';
+      for (let i = 0; i < 20; i++){
+        const px = fx0 + Math.random() * fw;
+        const py = fy0 + Math.random() * fh;
+        ctx.fillRect(px, py, 2, 2);
+      }
+      // Muschel-Umriss
+      ctx.strokeStyle = 'rgba(255,255,255,0.4)';
+      ctx.lineWidth = Math.max(1, fw * 0.02);
+      ctx.beginPath();
+      ctx.arc(fx0 + fw*0.5, fy0 + fh*0.5, fw*0.18, Math.PI, 0);
+      ctx.stroke();
+
+    } else if (style === 'lava'){
+      // Glühende Risse
+      const glowAlpha = 0.5 + Math.sin(animTime * 4) * 0.3;
+      ctx.strokeStyle = 'rgba(255,120,0,' + glowAlpha + ')';
+      ctx.lineWidth = Math.max(2, fw * 0.04);
+      ctx.beginPath();
+      ctx.moveTo(fx0 + fw*0.15, fy0);
+      ctx.lineTo(fx0 + fw*0.3, fy0 + fh*0.3);
+      ctx.lineTo(fx0 + fw*0.2, fy0 + fh*0.5);
+      ctx.lineTo(fx0 + fw*0.4, fy0 + fh*0.8);
+      ctx.lineTo(fx0 + fw*0.35, fy0 + fh);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(fx0 + fw*0.7, fy0);
+      ctx.lineTo(fx0 + fw*0.6, fy0 + fh*0.4);
+      ctx.lineTo(fx0 + fw*0.8, fy0 + fh*0.65);
+      ctx.lineTo(fx0 + fw*0.75, fy0 + fh);
+      ctx.stroke();
+      // Äußerer Glow
+      ctx.strokeStyle = 'rgba(255,180,50,' + (glowAlpha * 0.4) + ')';
+      ctx.lineWidth = Math.max(4, fw * 0.08);
+      ctx.stroke();
+
+    } else if (style === 'asteroid'){
+      // Krater
+      for (let i = 0; i < 4; i++){
+        const cx = fx0 + (0.2 + i * 0.22) * fw;
+        const cy = fy0 + (0.3 + (i % 2) * 0.35) * fh;
+        ctx.fillStyle = 'rgba(0,0,0,0.35)';
+        ctx.beginPath(); ctx.arc(cx, cy, fw*0.06, 0, Math.PI*2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.15)';
+        ctx.beginPath(); ctx.arc(cx - fw*0.02, cy - fw*0.02, fw*0.03, 0, Math.PI*2); ctx.fill();
+      }
+
+    } else if (style === 'candy'){
+      // Diagonal-Streifen
+      ctx.save();
+      ctx.beginPath();
+      ctx.rect(fx0, fy0, fw, fh);
+      ctx.clip();
+      const stripeW = fw * 0.18;
+      const offset = (animTime * 40) % (stripeW * 2);
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
+      for (let x = -fh - stripeW * 2 + offset; x < fw + fh; x += stripeW * 2){
+        ctx.beginPath();
+        ctx.moveTo(fx0 + x, fy0);
+        ctx.lineTo(fx0 + x + stripeW, fy0);
+        ctx.lineTo(fx0 + x + stripeW + fh, fy0 + fh);
+        ctx.lineTo(fx0 + x + fh, fy0 + fh);
+        ctx.closePath();
+        ctx.fill();
+      }
+      ctx.restore();
+
+    } else if (style === 'cyber'){
+      // Neon-Grid
+      ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+      ctx.lineWidth = Math.max(1, fw * 0.015);
+      for (let i = 1; i < 4; i++){
+        ctx.beginPath();
+        ctx.moveTo(fx0 + i * fw/4, fy0);
+        ctx.lineTo(fx0 + i * fw/4, fy0 + fh);
+        ctx.stroke();
+      }
+      for (let i = 1; i < 4; i++){
+        ctx.beginPath();
+        ctx.moveTo(fx0, fy0 + i * fh/4);
+        ctx.lineTo(fx0 + fw, fy0 + i * fh/4);
+        ctx.stroke();
+      }
+      // Pulsierendes Zentrum
+      const alpha = 0.4 + Math.sin(animTime * 5) * 0.3;
+      ctx.fillStyle = 'rgba(255,255,255,' + alpha + ')';
+      ctx.beginPath();
+      ctx.arc(fx0 + fw*0.5, fy0 + fh*0.5, fw*0.1, 0, Math.PI*2);
+      ctx.fill();
+    }
+  });
+
+  // Äußerer Glow (pulsierend) pro Style
+  if (w.style === 'neon' || w.style === 'lava' || w.style === 'cyber'){
+    ctx.save();
+    ctx.globalAlpha = 0.3 + Math.sin(animTime * 3) * 0.15;
+    ctx.strokeStyle = w.style === 'lava' ? '#ff8020' :
+                     w.style === 'cyber' ? '#00ffff' : '#80b0ff';
+    ctx.lineWidth = Math.max(3, p[1].s * 0.03);
+    ctx.beginPath();
+    ctx.moveTo(p[0].x, p[0].y);
+    ctx.lineTo(p[1].x, p[1].y);
+    ctx.lineTo(p[2].x, p[2].y);
+    ctx.lineTo(p[3].x, p[3].y);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
+/* =========================================================
+   COIN mit Glanz & Glow
+   ========================================================= */
 function drawClip(c){
   if (c.z - CAM_Z < 1.5) return;
   const p = proj(c.x, c.y, c.z);
-  const w = 0.26 * p.s;
-  const h = 0.32 * p.s;
+  const w = 0.26 * p.s, h = 0.32 * p.s;
   const spinScale = Math.max(0.25, Math.abs(Math.cos(c.spin)));
+  const bobY = Math.sin(c.spin * 2) * h * 0.15;
 
   ctx.save();
-  ctx.translate(p.x, p.y);
+  ctx.translate(p.x, p.y - bobY);
 
-  ctx.globalAlpha = 0.3;
-  ctx.fillStyle = '#ffc93c';
-  ctx.beginPath();
-  ctx.ellipse(0, h * 1.1, w * 0.9, h * 0.15, 0, 0, Math.PI * 2);
-  ctx.fill();
+  // Glow
+  const gg = ctx.createRadialGradient(0, 0, 0, 0, 0, w * 2);
+  gg.addColorStop(0, 'rgba(255,220,100,0.5)');
+  gg.addColorStop(1, 'rgba(255,220,100,0)');
+  ctx.fillStyle = gg;
+  ctx.beginPath(); ctx.arc(0, 0, w*2, 0, Math.PI*2); ctx.fill();
+
+  // Schatten
+  ctx.globalAlpha = 0.3; ctx.fillStyle = '#000';
+  ctx.beginPath(); ctx.ellipse(0, h*1.15, w*0.8, h*0.13, 0, 0, Math.PI*2); ctx.fill();
   ctx.globalAlpha = 1;
 
+  // Hauptmünze
   ctx.fillStyle = '#ffc93c';
-  ctx.beginPath();
-  ctx.ellipse(0, 0, w * spinScale, h, 0, 0, Math.PI * 2);
-  ctx.fill();
+  ctx.beginPath(); ctx.ellipse(0, 0, w*spinScale, h, 0, 0, Math.PI*2); ctx.fill();
 
+  // Rand
+  ctx.strokeStyle = '#b8860b';
+  ctx.lineWidth = Math.max(1, w * 0.12);
+  ctx.beginPath(); ctx.ellipse(0, 0, w*spinScale, h, 0, 0, Math.PI*2); ctx.stroke();
+
+  // Glanz
   ctx.fillStyle = '#ffe680';
   ctx.beginPath();
-  ctx.ellipse(-w * spinScale * 0.3, -h * 0.25, w * spinScale * 0.4, h * 0.35, 0, 0, Math.PI * 2);
+  ctx.ellipse(-w*spinScale*0.3, -h*0.25, w*spinScale*0.4, h*0.35, 0, 0, Math.PI*2);
   ctx.fill();
 
-  ctx.strokeStyle = '#b8860b';
-  ctx.lineWidth = Math.max(1, w * 0.1);
-  ctx.beginPath();
-  ctx.ellipse(0, 0, w * spinScale, h, 0, 0, Math.PI * 2);
-  ctx.stroke();
-
+  // Stern-Symbol
+  if (spinScale > 0.4){
+    ctx.fillStyle = '#b8860b';
+    const starR = w * spinScale * 0.4;
+    ctx.beginPath();
+    for (let i = 0; i < 5; i++){
+      const a = -Math.PI/2 + i * Math.PI * 2 / 5;
+      const x = Math.cos(a) * starR;
+      const y = Math.sin(a) * starR;
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+      const a2 = a + Math.PI / 5;
+      ctx.lineTo(Math.cos(a2) * starR * 0.4, Math.sin(a2) * starR * 0.4);
+    }
+    ctx.closePath(); ctx.fill();
+  }
   ctx.restore();
 }
 
+/* =========================================================
+   PARTIKEL
+   ========================================================= */
+function spawnSparkles(x, y, color){
+  for (let i = 0; i < 8; i++){
+    particles.push({
+      x, y,
+      vx: (Math.random() - 0.5) * 300,
+      vy: (Math.random() - 0.5) * 300 - 100,
+      life: 0.6,
+      maxLife: 0.6,
+      color: color,
+      size: 2 + Math.random() * 3
+    });
+  }
+}
+function updateParticles(dt){
+  for (const p of particles){
+    p.x += p.vx * dt;
+    p.y += p.vy * dt;
+    p.vy += 600 * dt;
+    p.life -= dt;
+  }
+  particles = particles.filter(p => p.life > 0);
+}
+function drawParticles(){
+  for (const p of particles){
+    const a = p.life / p.maxLife;
+    ctx.save();
+    ctx.globalAlpha = a;
+    ctx.fillStyle = p.color;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.size * a, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+}
+
+/* =========================================================
+   SPIELER & VERFOLGERIN
+   ========================================================= */
 function drawPlayerCharacter(){
-  const s  = F / (0 - CAM_Z);
+  const s = F / (0 - CAM_Z);
   const groundScreenY = horizonY + CAM_Y * s;
   const px = W / 2 + (player.x - camX) * s;
   const feetY = groundScreenY - player.y * s;
 
-  const sh = Math.max(0.4, 1 - player.y * 0.3);
-  ctx.save();
-  ctx.globalAlpha = 0.35 * sh;
-  ctx.fillStyle = '#000';
-  ctx.beginPath();
-  ctx.ellipse(px, groundScreenY, 0.42*s*sh, 0.13*s*sh, 0, 0, Math.PI*2);
-  ctx.fill();
-  ctx.restore();
+  // Schatten (weicher)
+  const sh = Math.max(0.35, 1 - player.y * 0.3);
+  const sg = ctx.createRadialGradient(px, groundScreenY, 0, px, groundScreenY, 0.5*s*sh);
+  sg.addColorStop(0, 'rgba(0,0,0,0.5)');
+  sg.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = sg;
+  ctx.beginPath(); ctx.ellipse(px, groundScreenY, 0.5*s*sh, 0.14*s*sh, 0, 0, Math.PI*2); ctx.fill();
 
   ctx.save();
   ctx.translate(px, feetY);
-  if (player.sliding){
-    ctx.scale(1.15, 0.55);
-    ctx.translate(0.12 * s, 0);
-  }
+  if (player.sliding){ ctx.scale(1.15, 0.55); ctx.translate(0.12*s, 0); }
   const skin = SKINS.find(x => x.id === save.selectedSkin) || SKINS[0];
-  drawCharacter(s, {
-    colors: skin.colors,
+  drawCharacter(ctx, s, {
+    config: skin.config,
     phase: (player.jumping || player.sliding) ? 0 : animTime * 14,
     jumping: player.jumping,
     sliding: player.sliding
@@ -661,47 +1151,46 @@ function drawPlayerCharacter(){
 }
 
 function drawChaser(){
-  const s = F / (CHASER_Z - CAM_Z);
+  const s = F / (-2.5 - CAM_Z);
   const groundScreenY = horizonY + CAM_Y * s;
-  const cx = W / 2 + (player.x * 0.4 + 0.6 - camX) * s;
+  const sway = Math.sin(animTime * 1.2) * 0.2;
+  const offset = 3.4 + sway;
+  const cx = W / 2 + offset * s * 0.85;
 
   ctx.save();
-  ctx.globalAlpha = 0.35;
-  ctx.fillStyle = '#000';
-  ctx.beginPath();
-  ctx.ellipse(cx, groundScreenY, 0.42*s, 0.13*s, 0, 0, Math.PI*2);
-  ctx.fill();
-  ctx.restore();
-
-  ctx.save();
+  ctx.globalAlpha = 0.42;
   ctx.translate(cx, groundScreenY);
-  drawCharacter(s, {
-    phase: animTime * 16 + 1.5,
-    colors: {
-      shirt:'#ff4080', shirtLight:'#ff80b0',
-      pants:'#7a2a8a', skin:'#f2c49b', shoe:'#ffffff'
-    },
-    hair: '#3a2050'
+  drawCharacter(ctx, s * 0.78, {
+    config: CHASER_CONFIG,
+    phase: animTime * 15 + 1.5
   });
   ctx.restore();
 }
 
+/* =========================================================
+   RENDER
+   ========================================================= */
 function render(){
-  ctx.clearRect(0, 0, W, H);
+  ctx.save();
+  if (shakeT > 0){
+    const dx = (Math.random() - 0.5) * shakeAmp;
+    const dy = (Math.random() - 0.5) * shakeAmp;
+    ctx.translate(dx, dy);
+  }
+
+  ctx.clearRect(-20, -20, W + 40, H + 40);
   drawGround();
 
   const sorted = obstacles.slice().sort((a, b) => b.z - a.z);
-  for (const o of sorted){
-    if (o.z > 0) drawObstacle(o);
-  }
+  for (const o of sorted) if (o.z > 0) drawObstacleStyled(o, o.t, worldIndex);
 
   const sortedClips = clips.slice().sort((a, b) => b.z - a.z);
-  for (const c of sortedClips){
-    if (!c.collected && c.z > 0) drawClip(c);
-  }
+  for (const c of sortedClips) if (!c.collected && c.z > 0) drawClip(c);
 
   drawPlayerCharacter();
   drawChaser();
+  drawParticles();
+  ctx.restore();
 }
 
 /* =========================================================
@@ -717,42 +1206,74 @@ function pickType(){
 function spawnObstacle(){
   const w = getWorld();
   const progress = Math.min(1, distance / 900);
+  const singleChance = Math.max(0.25, 0.72 - worldIndex * 0.05);
   let lanes;
-
-  if (distance < 150 || Math.random() < 0.62){
+  if (distance < 100 || Math.random() < singleChance){
     lanes = [Math.floor(Math.random() * 3)];
   } else {
     const free = Math.floor(Math.random() * 3);
     lanes = [0, 1, 2].filter(l => l !== free);
   }
-
   for (const ln of lanes){
     const t = pickType();
     const d = TYPES[t];
     obstacles.push({
-      x: LANES[ln], z: SPAWN_Z,
+      x: LANES[ln], z: SPAWN_Z, t: t,
       y0: d.y0, h: d.h, w: d.w, depth: d.depth,
       colors: w.obstacle[t]
     });
   }
-
-  const base = 1.3 - 0.55 * progress;
+  const base = Math.max(0.42, 1.4 - 0.65 * progress - worldIndex * 0.05);
   spawnT = (lanes.length > 1 ? base * 1.55 : base) + Math.random() * 0.3;
 }
 
-function spawnClipLine(){
+function addCoin(x, y, z){
+  clips.push({
+    x: x, y: y, z: z,
+    spin: Math.random() * Math.PI * 2,
+    collected: false
+  });
+}
+
+function spawnCoinPattern(){
   const lane = Math.floor(Math.random() * 3);
-  const count = 3 + Math.floor(Math.random() * 4);
-  for (let i = 0; i < count; i++){
-    clips.push({
-      x: LANES[lane],
-      z: SPAWN_Z + i * 2.8,
-      y: 0.5,
-      spin: Math.random() * Math.PI * 2,
-      collected: false
-    });
+  const pattern = Math.random();
+
+  if (pattern < 0.35){
+    // Gerade Linie
+    const count = 4 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < count; i++) addCoin(LANES[lane], 0.5, SPAWN_Z + i * 2.5);
+  } else if (pattern < 0.55){
+    // Bogen (zum Springen)
+    for (let i = 0; i < 5; i++){
+      const t = i / 4;
+      const h = 0.5 + Math.sin(t * Math.PI) * 2.0;
+      addCoin(LANES[lane], h, SPAWN_Z + i * 2);
+    }
+  } else if (pattern < 0.75){
+    // Zickzack über 2 Spuren
+    const lane2 = (lane + 1) % 3;
+    for (let i = 0; i < 6; i++){
+      addCoin(LANES[i % 2 === 0 ? lane : lane2], 0.5, SPAWN_Z + i * 2.2);
+    }
+  } else if (pattern < 0.9){
+    // Zwei parallele Linien
+    const lane2 = (lane + 1) % 3;
+    for (let i = 0; i < 3; i++){
+      addCoin(LANES[lane], 0.5, SPAWN_Z + i * 2.4);
+      addCoin(LANES[lane2], 0.5, SPAWN_Z + i * 2.4);
+    }
+  } else {
+    // V-Formation
+    const centers = [lane];
+    for (let i = 0; i < 5; i++){
+      const mid = 1;
+      const dx = Math.abs(i - 2);
+      const ln = Math.max(0, Math.min(2, mid + (i - 2)));
+      addCoin(LANES[ln], 0.5, SPAWN_Z + dx * 1.5);
+    }
   }
-  clipSpawnT = 3 + Math.random() * 4;
+  clipSpawnT = 0.7 + Math.random() * 1.2;
 }
 
 /* =========================================================
@@ -761,56 +1282,67 @@ function spawnClipLine(){
 function update(dt){
   distance += speed * dt;
   score = Math.floor(distance);
-  speed = Math.min(60, 22 + distance * 0.03 + worldIndex * 2);
+  speed = Math.min(72, 22 + distance * 0.025 + worldIndex * 4);
 
   document.getElementById('scoreVal').textContent = score;
-  if (score > save.bestScore){
-    document.getElementById('bestVal').textContent = score;
-  }
+  if (score > save.bestScore) document.getElementById('bestVal').textContent = score;
 
+  // Blinzeln
+  blinkTimer -= dt;
+  if (blinkTimer <= 0){ blinkTimer = 2 + Math.random() * 3; blinkAmt = 0; }
+  else if (blinkAmt < 1) blinkAmt = Math.min(1, blinkAmt + dt * 15);
+
+  // Spieler X
   const targetX = LANES[player.lane];
   player.x += (targetX - player.x) * Math.min(1, dt * 16);
 
+  // Sprung
   if (player.jumping){
     player.vy -= GRAVITY * dt;
     player.y  += player.vy * dt;
     if (player.y <= 0){ player.y = 0; player.vy = 0; player.jumping = false; }
   }
+  // Ducken
   if (player.sliding){
     player.slideT -= dt;
     if (player.slideT <= 0) player.sliding = false;
   }
 
+  // Hindernisse
   for (const o of obstacles) o.z -= speed * dt;
-
   for (const o of obstacles){
     if (!o.passed && o.z <= 0.4){
       o.passed = true;
-      if (checkHit(o)){ gameOver(); return; }
+      if (checkHit(o)){ triggerHit(); return; }
     }
   }
   obstacles = obstacles.filter(o => o.z > -6);
 
+  // Clips
   for (const c of clips){
     if (c.collected) continue;
     c.z -= speed * dt;
     c.spin += dt * 5;
     if (Math.abs(c.z) < 0.7 && Math.abs(player.x - c.x) < 0.8){
-      c.collected = true;
-      clipsThisRun++;
-      save.clips++;
+      const screenX = W/2 + (c.x - camX) * (F / (c.z - CAM_Z));
+      const screenY = horizonY + (CAM_Y - c.y) * (F / (c.z - CAM_Z));
+      c.collected = true; clipsThisRun++; save.clips++;
       document.getElementById('clipVal').textContent = clipsThisRun;
+      spawnSparkles(screenX, screenY, '#ffc93c');
     }
   }
   clips = clips.filter(c => !c.collected && c.z > -6);
 
+  // Spawnen
   spawnT -= dt;
   if (spawnT <= 0) spawnObstacle();
-
   clipSpawnT -= dt;
-  if (clipSpawnT <= 0) spawnClipLine();
+  if (clipSpawnT <= 0) spawnCoinPattern();
 
   camX = player.x * 0.3;
+
+  // Schütteln
+  if (shakeT > 0){ shakeT -= dt; shakeAmp *= 0.92; }
 
   if (score >= currentGoal) worldComplete();
 }
@@ -819,52 +1351,49 @@ function checkHit(o){
   if (Math.abs(player.x - o.x) > 0.95) return false;
   const pBot = player.y;
   const pTop = player.y + (player.sliding ? 0.85 : 1.88);
-  const oBot = o.y0;
-  const oTop = o.y0 + o.h;
-  return pBot < oTop && pTop > oBot;
+  return pBot < (o.y0 + o.h) && pTop > o.y0;
+}
+
+function triggerHit(){
+  shakeT = 0.5; shakeAmp = 16;
+  const cx = W/2 + (player.x - camX) * (F / (0 - CAM_Z));
+  const cy = horizonY + (CAM_Y - player.y) * (F / (0 - CAM_Z));
+  spawnSparkles(cx, cy, '#ff4060');
+  setTimeout(gameOver, 250);
 }
 
 /* =========================================================
    FLOW
    ========================================================= */
 function startGame(worldIdx){
-  worldIndex  = worldIdx;
+  worldIndex = worldIdx;
   currentGoal = WORLDS[worldIdx].goal;
 
-  score = 0;
-  distance = 0;
-  speed = 22 + worldIdx * 2;
-  obstacles = [];
-  clips = [];
-  spawnT = 0.9;
-  clipSpawnT = 1.5;
-  camX = 0;
-  clipsThisRun = 0;
-  gameOverFlag = false;
+  score = 0; distance = 0;
+  speed = 22 + worldIdx * 4;
+  obstacles = []; clips = []; particles = [];
+  spawnT = 0.9; clipSpawnT = 0.4;
+  camX = 0; clipsThisRun = 0; gameOverFlag = false;
+  shakeT = 0; shakeAmp = 0;
+  blinkTimer = 2 + Math.random() * 2; blinkAmt = 1;
 
-  player.lane = 1;
-  player.x = 0;
-  player.y = 0;
-  player.vy = 0;
-  player.jumping = false;
-  player.sliding = false;
-  player.slideT = 0;
+  player.lane = 1; player.x = 0; player.y = 0; player.vy = 0;
+  player.jumping = false; player.sliding = false; player.slideT = 0;
 
   document.getElementById('scoreVal').textContent = 0;
-  document.getElementById('clipVal').textContent  = 0;
-  document.getElementById('bestVal').textContent  = save.bestScore;
+  document.getElementById('clipVal').textContent = 0;
+  document.getElementById('bestVal').textContent = save.bestScore;
 
+  initParallax();
   setScreen('playing');
 }
 
 function gameOver(){
   if (gameOverFlag) return;
   gameOverFlag = true;
-
   if (score > save.bestScore) save.bestScore = score;
   if (score > (save.worldBest[worldIndex] || 0)) save.worldBest[worldIndex] = score;
   persist();
-
   document.getElementById('goScore').textContent = score;
   document.getElementById('goClips').textContent = '+' + clipsThisRun + ' Clips';
   setScreen('over');
@@ -873,7 +1402,6 @@ function gameOver(){
 function worldComplete(){
   if (gameOverFlag) return;
   gameOverFlag = true;
-
   if (score > save.bestScore) save.bestScore = score;
   save.worldBest[worldIndex] = Math.max(save.worldBest[worldIndex] || 0, score);
 
@@ -892,7 +1420,7 @@ function worldComplete(){
     btnNext.style.display = 'block';
     btnNext.textContent = 'WELT ' + (worldIndex + 2);
   } else {
-    info.textContent = 'Du hast alle Welten geschafft!';
+    info.textContent = 'Du hast alle 10 Welten geschafft!';
     btnNext.style.display = 'none';
   }
   setScreen('complete');
@@ -903,13 +1431,13 @@ function worldComplete(){
    ========================================================= */
 function setScreen(name){
   screen = name;
-  ['menu', 'worlds', 'shop', 'over', 'complete'].forEach(s => {
+  ['menu','worlds','shop','over','complete'].forEach(s => {
     const el = document.getElementById(s + 'Screen');
     if (el) el.classList.toggle('hidden', s !== name);
   });
   document.getElementById('hud').style.display = (name === 'playing') ? 'flex' : 'none';
   if (name === 'worlds') renderWorlds();
-  if (name === 'shop')   renderShop();
+  if (name === 'shop') renderShop();
 }
 
 function renderWorlds(){
@@ -919,7 +1447,6 @@ function renderWorlds(){
     const w = WORLDS[i];
     const unlocked = i < save.unlockedWorld;
     const best = save.worldBest[i] || 0;
-
     const card = document.createElement('div');
     card.className = 'worldCard' + (unlocked ? '' : ' locked');
 
@@ -956,17 +1483,17 @@ function renderShop(){
   document.getElementById('shopClips').textContent = save.clips;
 
   for (const skin of SKINS){
-    const owned    = save.ownedSkins.includes(skin.id);
+    const owned = save.ownedSkins.includes(skin.id);
     const equipped = save.selectedSkin === skin.id;
-
     const card = document.createElement('div');
     card.className = 'skinCard' + (equipped ? ' equipped' : '');
 
     const preview = document.createElement('div');
     preview.className = 'skinPreview';
-    preview.style.background =
-      'linear-gradient(135deg, ' + skin.colors.shirt + ', ' +
-      (skin.colors.hat || skin.colors.shirtLight) + ')';
+    preview.textContent = skin.emoji;
+    preview.style.background = 'linear-gradient(135deg, ' +
+      skin.config.colors.shirt + ', ' +
+      (skin.config.colors.hat || skin.config.colors.shirtLight) + ')';
     card.appendChild(preview);
 
     const name = document.createElement('div');
@@ -976,24 +1503,17 @@ function renderShop(){
 
     const btn = document.createElement('button');
     btn.className = 'skinBtn';
-    if (equipped){
-      btn.textContent = '✓ AKTIV';
-      btn.disabled = true;
-    } else if (owned){
+    if (equipped){ btn.textContent = '✓ AKTIV'; btn.disabled = true; }
+    else if (owned){
       btn.textContent = 'AUSWÄHLEN';
-      btn.onclick = () => {
-        save.selectedSkin = skin.id;
-        persist();
-        renderShop();
-      };
+      btn.onclick = () => { save.selectedSkin = skin.id; persist(); renderShop(); };
     } else if (save.clips >= skin.price){
       btn.textContent = skin.price + ' 🎬';
       btn.onclick = () => {
         save.clips -= skin.price;
         save.ownedSkins.push(skin.id);
         save.selectedSkin = skin.id;
-        persist();
-        renderShop();
+        persist(); renderShop();
       };
     } else {
       btn.textContent = '🔒 ' + skin.price;
@@ -1046,8 +1566,8 @@ canvas.addEventListener('touchend', (e) => {
 /* =========================================================
    BUTTONS
    ========================================================= */
-document.getElementById('btnPlay').onclick  = () => setScreen('worlds');
-document.getElementById('btnShop').onclick  = () => setScreen('shop');
+document.getElementById('btnPlay').onclick = () => setScreen('worlds');
+document.getElementById('btnShop').onclick = () => setScreen('shop');
 document.getElementById('btnRetry').onclick = () => startGame(worldIndex);
 document.getElementById('btnNextWorld').onclick = () => {
   if (worldIndex + 1 < WORLDS.length) startGame(worldIndex + 1);
@@ -1066,7 +1586,13 @@ function loop(now){
   if (dt > 0.05) dt = 0.05;
   animTime += dt;
 
-  if (screen === 'playing' && !gameOverFlag) update(dt);
+  if (screen === 'playing' && !gameOverFlag){
+    update(dt);
+    updateParallax(dt);
+    updateParticles(dt);
+  } else if (screen === 'menu' || screen === 'worlds'){
+    updateParallax(dt);
+  }
 
   render();
   requestAnimationFrame(loop);
@@ -1077,6 +1603,7 @@ function loop(now){
    ========================================================= */
 resize();
 document.getElementById('bestVal').textContent = save.bestScore;
+initParallax();
 setScreen('menu');
 requestAnimationFrame(loop);
 
