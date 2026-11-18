@@ -984,4 +984,539 @@ function drawClip(c){
    ========================================================= */
 function spawnSparkles(x, y, color){
   for (let i = 0; i < 8; i++){
-    particles.push
+    particles.push({
+      x, y, vx: (Math.random()-0.5)*300, vy: (Math.random()-0.5)*300 - 100,
+      life: 0.6, maxLife: 0.6, color, size: 2 + Math.random()*3
+    });
+  }
+}
+function updateParticles(dt){
+  for (const p of particles){
+    p.x += p.vx * dt; p.y += p.vy * dt;
+    p.vy += 600 * dt; p.life -= dt;
+  }
+  particles = particles.filter(p => p.life > 0);
+}
+function drawParticles(){
+  for (const p of particles){
+    const a = p.life / p.maxLife;
+    ctx.save();
+    ctx.globalAlpha = a; ctx.fillStyle = p.color;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.size * a, 0, Math.PI*2); ctx.fill();
+    ctx.restore();
+  }
+}
+
+/* =========================================================
+   SPIELER + VERFOLGERIN
+   ========================================================= */
+function drawPlayerCharacter(){
+  const s = F / (0 - CAM_Z);
+  const groundScreenY = horizonY + CAM_Y * s;
+  const px = W / 2 + (player.x - camX) * s;
+  const feetY = groundScreenY - player.y * s;
+
+  const sh = Math.max(0.35, 1 - player.y * 0.3);
+  const sg = ctx.createRadialGradient(px, groundScreenY, 0, px, groundScreenY, 0.5*s*sh);
+  sg.addColorStop(0, 'rgba(0,0,0,0.5)');
+  sg.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = sg;
+  ctx.beginPath(); ctx.ellipse(px, groundScreenY, 0.5*s*sh, 0.14*s*sh, 0, 0, Math.PI*2); ctx.fill();
+
+  ctx.save();
+  ctx.translate(px, feetY);
+  if (player.sliding){ ctx.scale(1.15, 0.55); ctx.translate(0.12*s, 0); }
+  const skin = SKINS.find(x => x.id === save.selectedSkin) || SKINS[0];
+  drawCharacter(ctx, s, {
+    config: skin.config,
+    phase: (player.jumping || player.sliding) ? 0 : animTime * 14,
+    jumping: player.jumping,
+    sliding: player.sliding
+  });
+  ctx.restore();
+}
+
+/* Realistische Verfolgerin – folgt der Spur mit Verzögerung */
+function drawChaser(){
+  const s = F / (CHASER_Z - CAM_Z);
+  const groundScreenY = horizonY + CAM_Y * s;
+  const cx = W / 2 + (chaserX + 0.25 - camX) * s;
+
+  // Schatten
+  ctx.save();
+  const sg = ctx.createRadialGradient(cx, groundScreenY, 0, cx, groundScreenY, 0.5*s);
+  sg.addColorStop(0, 'rgba(0,0,0,0.55)');
+  sg.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = sg;
+  ctx.beginPath(); ctx.ellipse(cx, groundScreenY, 0.45*s, 0.14*s, 0, 0, Math.PI*2); ctx.fill();
+  ctx.restore();
+
+  // Leichte Auf-und-Ab-Bewegung beim Laufen
+  const runBob = Math.abs(Math.sin(animTime * 19)) * 0.04 * s;
+
+  ctx.save();
+  ctx.globalAlpha = 0.92;
+  ctx.translate(cx, groundScreenY - runBob);
+  drawCharacter(ctx, s * 0.75, {
+    config: CHASER_CONFIG,
+    phase: animTime * 19 + 1.5
+  });
+  ctx.restore();
+}
+
+/* =========================================================
+   RENDER
+   ========================================================= */
+function render(){
+  ctx.save();
+  if (shakeT > 0){
+    ctx.translate((Math.random()-0.5) * shakeAmp, (Math.random()-0.5) * shakeAmp);
+  }
+
+  ctx.clearRect(-20, -20, W + 40, H + 40);
+  drawGround();
+
+  const sorted = obstacles.slice().sort((a, b) => b.z - a.z);
+  for (const o of sorted) if (o.z > 0) drawObstacleStyled(o, o.t, worldIndex);
+
+  const sortedClips = clips.slice().sort((a, b) => b.z - a.z);
+  for (const c of sortedClips) if (!c.collected && c.z > 0) drawClip(c);
+
+  // Verfolgerin zuerst, dann Spieler, damit Spieler oben liegt
+  drawChaser();
+  drawPlayerCharacter();
+  drawParticles();
+  ctx.restore();
+}
+
+/* =========================================================
+   SPAWNING
+   ========================================================= */
+function pickType(){
+  const r = Math.random();
+  if (r < 0.34) return 'low';
+  if (r < 0.68) return 'high';
+  return 'block';
+}
+
+function spawnObstacle(){
+  const w = getWorld();
+  const progress = Math.min(1, distance / 900);
+  const singleChance = Math.max(0.25, 0.72 - worldIndex * 0.05);
+  let lanes;
+  if (distance < 100 || Math.random() < singleChance){
+    lanes = [Math.floor(Math.random() * 3)];
+  } else {
+    const free = Math.floor(Math.random() * 3);
+    lanes = [0, 1, 2].filter(l => l !== free);
+  }
+  for (const ln of lanes){
+    const t = pickType();
+    const d = TYPES[t];
+    obstacles.push({
+      x: LANES[ln], z: SPAWN_Z, t: t,
+      y0: d.y0, h: d.h, w: d.w, depth: d.depth,
+      colors: w.obstacle[t]
+    });
+  }
+  const base = Math.max(0.42, 1.4 - 0.65 * progress - worldIndex * 0.05);
+  spawnT = (lanes.length > 1 ? base * 1.55 : base) + Math.random() * 0.3;
+}
+
+function addCoin(x, y, z){
+  clips.push({ x, y, z, spin: Math.random() * Math.PI * 2, collected: false });
+}
+
+function spawnCoinPattern(){
+  const lane = Math.floor(Math.random() * 3);
+  const pattern = Math.random();
+
+  if (pattern < 0.35){
+    const count = 4 + Math.floor(Math.random() * 3);
+    for (let i = 0; i < count; i++) addCoin(LANES[lane], 0.5, SPAWN_Z + i * 2.5);
+  } else if (pattern < 0.55){
+    // Bogen – muss gesprungen werden
+    for (let i = 0; i < 5; i++){
+      const t = i / 4;
+      const h = 0.5 + Math.sin(t * Math.PI) * 2.3;
+      addCoin(LANES[lane], h, SPAWN_Z + i * 2);
+    }
+  } else if (pattern < 0.75){
+    const lane2 = (lane + 1) % 3;
+    for (let i = 0; i < 6; i++){
+      addCoin(LANES[i % 2 === 0 ? lane : lane2], 0.5, SPAWN_Z + i * 2.2);
+    }
+  } else if (pattern < 0.9){
+    const lane2 = (lane + 1) % 3;
+    for (let i = 0; i < 3; i++){
+      addCoin(LANES[lane], 0.5, SPAWN_Z + i * 2.4);
+      addCoin(LANES[lane2], 0.5, SPAWN_Z + i * 2.4);
+    }
+  } else {
+    for (let i = 0; i < 5; i++){
+      const ln = Math.max(0, Math.min(2, 1 + (i - 2)));
+      addCoin(LANES[ln], 0.5, SPAWN_Z + Math.abs(i - 2) * 1.5);
+    }
+  }
+  clipSpawnT = 0.7 + Math.random() * 1.2;
+}
+
+/* =========================================================
+   UPDATE
+   ========================================================= */
+function update(dt){
+  distance += speed * dt;
+  score = Math.floor(distance);
+  speed = Math.min(72, 22 + distance * 0.025 + worldIndex * 4);
+
+  document.getElementById('scoreVal').textContent = score;
+  if (score > save.bestScore) document.getElementById('bestVal').textContent = score;
+
+  // Blinzeln
+  blinkTimer -= dt;
+  if (blinkTimer <= 0){ blinkTimer = 2 + Math.random() * 3; blinkAmt = 0; }
+  else if (blinkAmt < 1) blinkAmt = Math.min(1, blinkAmt + dt * 15);
+
+  // Spieler
+  const targetX = LANES[player.lane];
+  player.x += (targetX - player.x) * Math.min(1, dt * 16);
+
+  // Verfolgerin folgt mit Verzögerung
+  chaserX += (player.x - chaserX) * Math.min(1, dt * 2.8);
+
+  if (player.jumping){
+    player.vy -= GRAVITY * dt;
+    player.y  += player.vy * dt;
+    if (player.y <= 0){ player.y = 0; player.vy = 0; player.jumping = false; }
+  }
+  if (player.sliding){
+    player.slideT -= dt;
+    if (player.slideT <= 0) player.sliding = false;
+  }
+
+  // Hindernisse
+  for (const o of obstacles) o.z -= speed * dt;
+  for (const o of obstacles){
+    if (!o.passed && o.z <= 0.4){
+      o.passed = true;
+      if (checkHit(o)){ triggerHit(); return; }
+    }
+  }
+  obstacles = obstacles.filter(o => o.z > -6);
+
+  // Clips – nur bei wirklich Kontakt einsammeln (X + Y + Z)
+  const bodyBot = player.y;
+  const bodyTop = player.y + (player.sliding ? 0.85 : 1.88);
+
+  for (const c of clips){
+    if (c.collected) continue;
+    c.z -= speed * dt;
+    c.spin += dt * 5;
+
+    const nearZ = Math.abs(c.z) < 0.7;
+    const nearX = Math.abs(player.x - c.x) < 0.7;
+    const overY = bodyTop > c.y - 0.25 && bodyBot < c.y + 0.25;
+
+    if (nearZ && nearX && overY){
+      const screenX = W/2 + (c.x - camX) * (F / (c.z - CAM_Z));
+      const screenY = horizonY + (CAM_Y - c.y) * (F / (c.z - CAM_Z));
+      c.collected = true; clipsThisRun++; save.clips++;
+      document.getElementById('clipVal').textContent = clipsThisRun;
+      spawnSparkles(screenX, screenY, '#ffc93c');
+    }
+  }
+  clips = clips.filter(c => !c.collected && c.z > -6);
+
+  spawnT -= dt; if (spawnT <= 0) spawnObstacle();
+  clipSpawnT -= dt; if (clipSpawnT <= 0) spawnCoinPattern();
+
+  camX = player.x * 0.3;
+
+  if (shakeT > 0){ shakeT -= dt; shakeAmp *= 0.92; }
+  if (score >= currentGoal) worldComplete();
+}
+
+function checkHit(o){
+  if (Math.abs(player.x - o.x) > 0.95) return false;
+  const pBot = player.y;
+  const pTop = player.y + (player.sliding ? 0.85 : 1.88);
+  return pBot < (o.y0 + o.h) && pTop > o.y0;
+}
+
+function triggerHit(){
+  shakeT = 0.5; shakeAmp = 16;
+  const cx = W/2 + (player.x - camX) * (F / (0 - CAM_Z));
+  const cy = horizonY + (CAM_Y - player.y) * (F / (0 - CAM_Z));
+  spawnSparkles(cx, cy, '#ff4060');
+  setTimeout(gameOver, 250);
+}
+
+/* =========================================================
+   FLOW
+   ========================================================= */
+function startGame(worldIdx){
+  worldIndex = worldIdx;
+  currentGoal = WORLDS[worldIdx].goal;
+
+  score = 0; distance = 0;
+  speed = 22 + worldIdx * 4;
+  obstacles = []; clips = []; particles = [];
+  spawnT = 0.9; clipSpawnT = 0.4;
+  camX = 0; chaserX = 0; clipsThisRun = 0; gameOverFlag = false;
+  shakeT = 0; shakeAmp = 0;
+  blinkTimer = 2 + Math.random() * 2; blinkAmt = 1;
+
+  player.lane = 1; player.x = 0; player.y = 0; player.vy = 0;
+  player.jumping = false; player.sliding = false; player.slideT = 0;
+
+  document.getElementById('scoreVal').textContent = 0;
+  document.getElementById('clipVal').textContent = 0;
+  document.getElementById('bestVal').textContent = save.bestScore;
+
+  initParallax();
+  setScreen('playing');
+}
+
+function gameOver(){
+  if (gameOverFlag) return;
+  gameOverFlag = true;
+  if (score > save.bestScore) save.bestScore = score;
+  if (score > (save.worldBest[worldIndex] || 0)) save.worldBest[worldIndex] = score;
+  persist();
+  document.getElementById('goScore').textContent = score;
+  document.getElementById('goClips').textContent = '+' + clipsThisRun + ' Clips';
+  setScreen('over');
+}
+
+function worldComplete(){
+  if (gameOverFlag) return;
+  gameOverFlag = true;
+  if (score > save.bestScore) save.bestScore = score;
+  save.worldBest[worldIndex] = Math.max(save.worldBest[worldIndex] || 0, score);
+
+  let nextWorldAvailable = false;
+  if (worldIndex + 1 < WORLDS.length){
+    save.unlockedWorld = Math.max(save.unlockedWorld, worldIndex + 2);
+    nextWorldAvailable = true;
+  }
+  persist();
+
+  document.getElementById('wcScore').textContent = score;
+  const info = document.getElementById('wcInfo');
+  const btnNext = document.getElementById('btnNextWorld');
+  if (nextWorldAvailable){
+    info.textContent = 'Welt ' + (worldIndex + 2) + ' freigeschaltet!';
+    btnNext.style.display = 'block';
+    btnNext.textContent = 'WELT ' + (worldIndex + 2);
+  } else {
+    info.textContent = 'Du hast alle 10 Welten geschafft!';
+    btnNext.style.display = 'none';
+  }
+  setScreen('complete');
+}
+
+/* =========================================================
+   UI
+   ========================================================= */
+function setScreen(name){
+  screen = name;
+  ['menu','worlds','shop','over','complete'].forEach(s => {
+    const el = document.getElementById(s + 'Screen');
+    if (el) el.classList.toggle('hidden', s !== name);
+  });
+  document.getElementById('hud').style.display = (name === 'playing') ? 'flex' : 'none';
+  if (name === 'worlds') renderWorlds();
+  if (name === 'shop') renderShop();
+}
+
+function renderWorlds(){
+  const grid = document.getElementById('worldGrid');
+  grid.innerHTML = '';
+  for (let i = 0; i < WORLDS.length; i++){
+    const w = WORLDS[i];
+    const unlocked = i < save.unlockedWorld;
+    const best = save.worldBest[i] || 0;
+    const card = document.createElement('div');
+    card.className = 'worldCard' + (unlocked ? '' : ' locked');
+
+    const band = document.createElement('div');
+    band.className = 'worldBand';
+    band.style.background = 'linear-gradient(90deg, ' + w.sky[1] + ', ' + w.sky[2] + ')';
+    card.appendChild(band);
+
+    const num = document.createElement('div');
+    num.className = 'worldNum';
+    num.textContent = unlocked ? ('WELT ' + (i + 1)) : '🔒';
+    card.appendChild(num);
+
+    const name = document.createElement('div');
+    name.className = 'worldName';
+    name.textContent = w.name;
+    card.appendChild(name);
+
+    const info = document.createElement('div');
+    info.className = 'worldInfo';
+    info.textContent = unlocked
+      ? (best > 0 ? ('Best: ' + best) : ('Ziel: ' + w.goal))
+      : 'Gesperrt';
+    card.appendChild(info);
+
+    if (unlocked) card.onclick = () => startGame(i);
+    grid.appendChild(card);
+  }
+}
+
+function renderShop(){
+  const grid = document.getElementById('skinGrid');
+  grid.innerHTML = '';
+  document.getElementById('shopClips').textContent = save.clips;
+
+  for (const skin of SKINS){
+    const owned = save.ownedSkins.includes(skin.id);
+    const equipped = save.selectedSkin === skin.id;
+    const card = document.createElement('div');
+    card.className = 'skinCard' + (equipped ? ' equipped' : '');
+
+    const preview = document.createElement('div');
+    preview.className = 'skinPreview';
+    preview.textContent = skin.emoji;
+    preview.style.background = 'linear-gradient(135deg, ' +
+      skin.config.colors.shirt + ', ' +
+      (skin.config.colors.hat || skin.config.colors.shirtLight) + ')';
+    card.appendChild(preview);
+
+    const name = document.createElement('div');
+    name.className = 'skinName';
+    name.textContent = skin.name;
+    card.appendChild(name);
+
+    const btn = document.createElement('button');
+    btn.className = 'skinBtn';
+    if (equipped){ btn.textContent = '✓ AKTIV'; btn.disabled = true; }
+    else if (owned){
+      btn.textContent = 'AUSWÄHLEN';
+      btn.onclick = () => { save.selectedSkin = skin.id; persist(); renderShop(); };
+    } else if (save.clips >= skin.price){
+      btn.textContent = skin.price + ' 🎬';
+      btn.onclick = () => {
+        save.clips -= skin.price;
+        save.ownedSkins.push(skin.id);
+        save.selectedSkin = skin.id;
+        persist(); renderShop();
+      };
+    } else {
+      btn.textContent = '🔒 ' + skin.price;
+      btn.disabled = true;
+    }
+    card.appendChild(btn);
+    grid.appendChild(card);
+  }
+}
+
+/* =========================================================
+   INPUT
+   ========================================================= */
+function moveLeft()  { if (player.lane > 0) player.lane--; }
+function moveRight() { if (player.lane < 2) player.lane++; }
+function doJump(){
+  if (player.jumping || player.sliding) return;
+  player.jumping = true; player.vy = JUMP_V;
+}
+function doSlide(){
+  if (player.sliding || player.jumping) return;
+  player.sliding = true; player.slideT = SLIDE_T;
+}
+
+window.addEventListener('keydown', (e) => {
+  if (screen !== 'playing') return;
+  const k = e.key.toLowerCase();
+  if      (k === 'arrowleft'  || k === 'a'){ e.preventDefault(); moveLeft(); }
+  else if (k === 'arrowright' || k === 'd'){ e.preventDefault(); moveRight(); }
+  else if (k === 'arrowup'    || k === 'w' || k === ' '){ e.preventDefault(); doJump(); }
+  else if (k === 'arrowdown'  || k === 's'){ e.preventDefault(); doSlide(); }
+});
+
+let touchStart = null;
+canvas.addEventListener('touchstart', (e) => {
+  touchStart = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+}, { passive: true });
+canvas.addEventListener('touchend', (e) => {
+  if (!touchStart || screen !== 'playing') return;
+  const dx = e.changedTouches[0].clientX - touchStart.x;
+  const dy = e.changedTouches[0].clientY - touchStart.y;
+  const adx = Math.abs(dx), ady = Math.abs(dy);
+  if (Math.max(adx, ady) > 26){
+    if (adx > ady) dx > 0 ? moveRight() : moveLeft();
+    else           dy > 0 ? doSlide()  : doJump();
+  }
+  touchStart = null;
+}, { passive: true });
+
+/* =========================================================
+   BUTTONS
+   ========================================================= */
+document.getElementById('btnPlay').onclick = () => setScreen('worlds');
+document.getElementById('btnShop').onclick = () => setScreen('shop');
+document.getElementById('btnRetry').onclick = () => startGame(worldIndex);
+document.getElementById('btnNextWorld').onclick = () => {
+  if (worldIndex + 1 < WORLDS.length) startGame(worldIndex + 1);
+};
+document.querySelectorAll('[data-back]').forEach(b => {
+  b.onclick = () => setScreen('menu');
+});
+
+/* =========================================================
+   ADMIN BUTTON
+   ========================================================= */
+document.getElementById('adminBtn').onclick = () => {
+  const code = prompt("🔑 Admin-Code eingeben:");
+  if (code === null) return;
+  if (code.trim() === ADMIN_CODE){
+    save.clips = 99999;
+    save.ownedSkins = SKINS.map(s => s.id);
+    save.unlockedWorld = WORLDS.length;
+    persist();
+    alert("✅ Admin aktiviert!\n\n• Alle Skins freigeschaltet\n• Alle 10 Welten freigeschaltet\n• 99.999 Clips gutgeschrieben");
+    if (screen === 'shop') renderShop();
+    if (screen === 'worlds') renderWorlds();
+    document.getElementById('shopClips').textContent = save.clips;
+  } else {
+    alert("❌ Falscher Code!");
+  }
+};
+
+/* =========================================================
+   LOOP
+   ========================================================= */
+let lastTime = performance.now();
+function loop(now){
+  let dt = (now - lastTime) / 1000;
+  lastTime = now;
+  if (dt > 0.05) dt = 0.05;
+  animTime += dt;
+
+  if (screen === 'playing' && !gameOverFlag){
+    update(dt);
+    updateParallax(dt);
+    updateParticles(dt);
+  } else if (screen === 'menu' || screen === 'worlds'){
+    updateParallax(dt);
+  }
+
+  render();
+  requestAnimationFrame(loop);
+}
+
+/* =========================================================
+   INIT
+   ========================================================= */
+resize();
+document.getElementById('bestVal').textContent = save.bestScore;
+initParallax();
+setScreen('menu');
+requestAnimationFrame(loop);
+
+})();
+</script>
+</body>
+</html>
