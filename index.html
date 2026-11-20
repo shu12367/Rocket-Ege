@@ -1,4 +1,4 @@
-><!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="de">
 <head>
 <meta charset="utf-8">
@@ -254,7 +254,7 @@
   </div>
   <div class="stat mid">
     <div class="val" id="hitsVal">0/10</div>
-    <div class="lbl">TREFFER</div>
+    <div class="lbl">STICHE</div>
   </div>
   <div class="stat right">
     <div class="val" id="missVal">0/3</div>
@@ -264,9 +264,10 @@
 
 <div id="menuScreen" class="screen">
   <h1>FRUIT NINJA</h1>
-  <div class="subtitle">SCHNEIDE · ZIELE · GEWINNE</div>
-  <p>Treffe die große Frucht 10-mal mit deinem Messer.<br>
-     Verfehle sie maximal 3-mal – sonst verlierst du!</p>
+  <div class="subtitle">STICH · ZIEL · GEWINN</div>
+  <p>Tippe auf die Frucht, damit dein Messer hineinfliegt und stecken bleibt.<br>
+     <strong>Triff nicht deine eigenen Messer!</strong><br>
+     3 Fehler = Game Over</p>
   <div class="menuBtns">
     <button class="btnMain" id="btnPlay">SPIELEN</button>
     <button class="btnMain secondary" id="btnShop">MESSER-SHOP</button>
@@ -321,28 +322,28 @@
    ========================================================= */
 const ADMIN_CODE = "EgeAbi";
 const TOTAL_LEVELS = 20;
-const HITS_PER_LEVEL = 10;
 const MAX_MISSES = 3;
 
-/* =========================================================
-   LEVEL-KONFIGURATION
-   Frucht bleibt ZENTRIERT und DREHT sich.
-   Höhere Level = schnellere Rotation, kleinere Frucht.
-   ========================================================= */
+// Level 1 = 10 Stiche, Level 20 = 50 Stiche
+function getHitsRequired(lvl){
+  return Math.round(10 + (lvl - 1) * (40 / (TOTAL_LEVELS - 1)));
+}
+
+// Frucht-Drehung / Wackeln je Level
 function getLevelConfig(lvl){
   const t = (lvl - 1) / (TOTAL_LEVELS - 1);
-  let rotationSpeed = 1.2 + t * 6;      // rad/s – wie schnell die Frucht sich dreht
-  let fruitScale = 1.0 - t * 0.35;       // 1.0 → 0.65
-  let wobbleAmp = 6 + t * 40;            // kleine Zitter-Bewegung (px)
-  let wobbleFreq = 0.8 + t * 2.5;
+  let rotationSpeed = 0.8 + t * 3.2;
+  let fruitScale    = 0.9 - t * 0.2;
+  let wobbleAmp     = 4 + t * 30;
+  let wobbleFreq    = 0.6 + t * 2.0;
 
-  // Letzte 5 Level: EXTREM
+  // Extreme Level
   if (lvl > 15){
     const e = (lvl - 15) / 5;
-    rotationSpeed = 7 + e * 12;          // bis 19 rad/s
-    fruitScale = 0.65 - e * 0.15;        // bis 0.5
-    wobbleAmp = 46 + e * 60;             // bis 106 px
-    wobbleFreq = 3.3 + e * 2.5;
+    rotationSpeed = 4 + e * 6;
+    fruitScale    = 0.7 - e * 0.1;
+    wobbleAmp     = 34 + e * 30;
+    wobbleFreq    = 2.6 + e * 1.5;
   }
 
   return { rotationSpeed, fruitScale, wobbleAmp, wobbleFreq };
@@ -375,7 +376,7 @@ const KNIVES = [
 ];
 
 /* =========================================================
-   FRÜCHTE (jede mit eigener Farbe)
+   FRÜCHTE
    ========================================================= */
 const FRUITS = [
   { name:'Apfel',        colors:['#ff3030','#d01010','#800000'], leaf:'#20a040' },
@@ -389,7 +390,7 @@ const FRUITS = [
 /* =========================================================
    SAVE
    ========================================================= */
-const SAVE_KEY = 'fruitninja_save_v2';
+const SAVE_KEY = 'fruitninja_save_v3';
 function defaultSave(){ return {
   clips:0, unlockedLevel:1,
   ownedKnives:['basic'], selectedKnife:'basic',
@@ -430,46 +431,42 @@ let screen = 'menu';
 let level = 1;
 let hits = 0;
 let misses = 0;
+let hitsRequired = 10;
 let animTime = 0;
 let gameOverFlag = false;
 
-// Frucht – BLEIBT IN DER MITTE
+// Frucht (mittig, groß, dreht sich)
 const fruit = {
-  x: 0, y: 0,              // wird jeden Frame auf W/2, H/2 gesetzt
-  size: 200,               // groß!
+  x: 0, y: 0,
+  baseSize: 300,
+  size: 300,
   rotation: 0,
   rotationSpeed: 2,
-  baseSize: 200,
+  wobbleX: 0, wobbleY: 0,
   wobblePhase: 0,
-  wobbleAmp: 8,
-  wobbleFreq: 1,
-  wobbleX: 0,
-  wobbleY: 0,
   hitFlash: 0,
-  hitScale: 1,             // kurzer Hüpfer beim Treffer
+  hitScale: 1,
   colors: FRUITS[0].colors,
-  leaf: FRUITS[0].leaf,
-  visible: true,
-  fruitIndex: 0
+  leaf: FRUITS[0].leaf
 };
 
-// Messer
-const knife = {
-  x: 0, y: 0, targetX: 0, targetY: 0,
-  angle: 0, slicing: 0,
-  visible: false,
-  trail: []
-};
+// Fliegende Messer (animiert rein)
+const flyingKnives = [];
 
-// Effekte
-let sliceEffects = [];
+// Steckende Messer in der Frucht (relativ zur Frucht gedreht)
+const stuckKnives = [];
+
+// Klick-Marker
+let clickMarkers = [];
+
+// Slice/Partikel
 let juiceParticles = [];
 let hitSplash = [];
 let flashT = 0;
-let starParticles = []; // Deko im Hintergrund
+let starParticles = [];
 
 /* =========================================================
-   ZEICHENFUNKTIONEN
+   ZEICHEN
    ========================================================= */
 function drawBackground(){
   const grad = ctx.createRadialGradient(W/2, H/2, 0, W/2, H/2, Math.max(W, H) * 0.8);
@@ -496,7 +493,6 @@ function drawBackground(){
     ctx.fillRect(0, 0, W, H);
   }
 
-  // Deko-Sterne
   for (const s of starParticles){
     ctx.save();
     ctx.globalAlpha = s.alpha;
@@ -514,16 +510,14 @@ function drawBackground(){
   ctx.fillRect(0, 0, W, H);
 }
 
-function drawFruit(f){
-  if (!f.visible) return;
-
-  const r = f.size / 2 * f.hitScale;
+function drawFruitBody(){
+  const r = fruit.size / 2 * fruit.hitScale;
 
   ctx.save();
-  ctx.translate(f.x + f.wobbleX, f.y + f.wobbleY);
-  ctx.rotate(f.rotation);
+  ctx.translate(fruit.x + fruit.wobbleX, fruit.y + fruit.wobbleY);
+  ctx.rotate(fruit.rotation);
 
-  // Äußerer Glow
+  // Glow
   if (level > 15){
     const pulse = 0.5 + Math.sin(animTime * 8) * 0.3;
     ctx.shadowColor = 'rgba(255,40,100,' + pulse + ')';
@@ -545,7 +539,7 @@ function drawFruit(f){
   ctx.restore();
 
   // Körper
-  const fc = f.colors;
+  const fc = fruit.colors;
   const grad = ctx.createRadialGradient(-r * 0.35, -r * 0.35, 0, 0, 0, r);
   grad.addColorStop(0, fc[0]);
   grad.addColorStop(0.6, fc[1]);
@@ -563,7 +557,7 @@ function drawFruit(f){
   ctx.fill();
 
   // Blatt
-  ctx.fillStyle = f.leaf;
+  ctx.fillStyle = fruit.leaf;
   ctx.beginPath();
   ctx.moveTo(0, -r * 0.95);
   ctx.quadraticCurveTo(r * 0.22, -r * 1.15, r * 0.05, -r * 1.3);
@@ -579,8 +573,8 @@ function drawFruit(f){
   ctx.stroke();
 
   // Hit-Flash
-  if (f.hitFlash > 0){
-    ctx.globalAlpha = f.hitFlash;
+  if (fruit.hitFlash > 0){
+    ctx.globalAlpha = fruit.hitFlash;
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
     ctx.arc(0, 0, r, 0, Math.PI * 2);
@@ -591,37 +585,20 @@ function drawFruit(f){
   ctx.restore();
 }
 
-function drawKnife(k){
-  const knifeDef = KNIVES.find(x => x.id === save.selectedKnife) || KNIVES[0];
-  const size = 60;
-
-  // Trail
-  for (let i = 0; i < k.trail.length; i++){
-    const t = k.trail[i];
-    const alpha = (i + 1) / k.trail.length * 0.6;
-    ctx.save();
-    ctx.globalAlpha = alpha;
-    ctx.fillStyle = knifeDef.edge;
-    ctx.beginPath();
-    ctx.arc(t.x, t.y, 3 + i * 0.4, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-  }
-
+// Messer in lokalen Koordinaten zeichnen
+function drawKnifeShape(ctx, kdef, size){
   ctx.save();
-  ctx.translate(k.x, k.y);
-  ctx.rotate(k.angle);
 
-  if (knifeDef.glow){
-    ctx.shadowColor = knifeDef.glow;
-    ctx.shadowBlur = 25;
+  if (kdef.glow){
+    ctx.shadowColor = kdef.glow;
+    ctx.shadowBlur = 20;
   } else {
     ctx.shadowColor = 'rgba(255,255,255,0.3)';
-    ctx.shadowBlur = 10;
+    ctx.shadowBlur = 8;
   }
 
   // Klinge
-  ctx.fillStyle = knifeDef.blade;
+  ctx.fillStyle = kdef.blade;
   ctx.beginPath();
   ctx.moveTo(-size * 0.5, -size * 0.12);
   ctx.lineTo(size * 0.5, -size * 0.06);
@@ -632,7 +609,7 @@ function drawKnife(k){
   ctx.fill();
 
   // Kante
-  ctx.fillStyle = knifeDef.edge;
+  ctx.fillStyle = kdef.edge;
   ctx.beginPath();
   ctx.moveTo(-size * 0.5, -size * 0.12);
   ctx.lineTo(size * 0.5, -size * 0.06);
@@ -643,7 +620,7 @@ function drawKnife(k){
 
   // Griff
   ctx.shadowBlur = 0;
-  ctx.fillStyle = knifeDef.handle;
+  ctx.fillStyle = kdef.handle;
   ctx.fillRect(-size * 0.5 - 18, -size * 0.14, 18, size * 0.28);
 
   ctx.fillStyle = 'rgba(255,255,255,0.2)';
@@ -652,18 +629,60 @@ function drawKnife(k){
   ctx.restore();
 }
 
-function drawSliceEffect(se){
+function drawStuckKnives(){
+  // Steckende Messer werden in der Frucht mitgedreht
+  const r = fruit.size / 2 * fruit.hitScale;
   ctx.save();
-  ctx.globalAlpha = se.life;
-  ctx.strokeStyle = se.color;
-  ctx.lineWidth = 5;
-  ctx.shadowColor = se.color;
-  ctx.shadowBlur = 20;
-  ctx.beginPath();
-  ctx.moveTo(se.x1, se.y1);
-  ctx.lineTo(se.x2, se.y2);
-  ctx.stroke();
+  ctx.translate(fruit.x + fruit.wobbleX, fruit.y + fruit.wobbleY);
+  ctx.rotate(fruit.rotation);
+
+  for (const k of stuckKnives){
+    ctx.save();
+    ctx.translate(k.localX, k.localY);
+    ctx.rotate(k.localAngle);
+    drawKnifeShape(ctx, k.def, k.size);
+    ctx.restore();
+  }
+
+  // Messer-Definitionen für Kollision merken (in Welt-Koordinaten)
+  // (Wird direkt in fruitStuckKnifePositions gespeichert)
   ctx.restore();
+}
+
+// Absolute Position eines steckenden Messers in Weltkoordinaten
+function getStuckKnifeWorldPos(k){
+  const baseX = fruit.x + fruit.wobbleX;
+  const baseY = fruit.y + fruit.wobbleY;
+  const cos = Math.cos(fruit.rotation);
+  const sin = Math.sin(fruit.rotation);
+  return {
+    x: baseX + k.localX * cos - k.localY * sin,
+    y: baseY + k.localX * sin + k.localY * cos,
+    angle: k.localAngle + fruit.rotation,
+    size: k.size
+  };
+}
+
+function drawFlyingKnives(){
+  for (const fk of flyingKnives){
+    // Trail
+    for (let i = 0; i < fk.trail.length; i++){
+      const t = fk.trail[i];
+      const alpha = (i + 1) / fk.trail.length * 0.5;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = fk.def.edge;
+      ctx.beginPath();
+      ctx.arc(t.x, t.y, 2 + i * 0.3, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+    ctx.save();
+    ctx.translate(fk.x, fk.y);
+    ctx.rotate(fk.angle);
+    drawKnifeShape(ctx, fk.def, fk.size);
+    ctx.restore();
+  }
 }
 
 function drawJuiceParticles(){
@@ -678,48 +697,64 @@ function drawJuiceParticles(){
   }
 }
 
+function drawClickMarkers(){
+  for (const m of clickMarkers){
+    ctx.save();
+    ctx.globalAlpha = m.life;
+    ctx.strokeStyle = m.color;
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(m.x, m.y, (1 - m.life) * 40 + 10, 0, Math.PI * 2);
+    ctx.stroke();
+    ctx.restore();
+  }
+}
+
 /* =========================================================
    UPDATE
    ========================================================= */
 function update(dt){
   animTime += dt;
 
-  // Frucht-Mitte
-  const cx = W / 2;
-  const cy = H / 2;
-
   const cfg = getLevelConfig(level);
   fruit.rotation += cfg.rotationSpeed * dt;
-  fruit.rotationSpeed = cfg.rotationSpeed;
+  fruit.wobblePhase += cfg.wobbleFreq * dt;
   fruit.baseSize = Math.min(W, H) * 0.55 * cfg.fruitScale;
   fruit.size = fruit.baseSize;
-
-  // Wobble (kleine unruhige Bewegung in höheren Leveln)
-  fruit.wobblePhase += cfg.wobbleFreq * dt;
   fruit.wobbleX = Math.sin(fruit.wobblePhase) * cfg.wobbleAmp;
-  fruit.wobbleY = Math.cos(fruit.wobblePhase * 1.3) * cfg.wobbleAmp * 0.7;
+  fruit.wobbleY = Math.cos(fruit.wobblePhase * 1.3) * cfg.wobbleAmp * 0.6;
+  fruit.x = W / 2;
+  fruit.y = H / 2;
 
-  fruit.x = cx;
-  fruit.y = cy;
-
-  // Hit-Flash / Hit-Scale abklingen
   if (fruit.hitFlash > 0) fruit.hitFlash = Math.max(0, fruit.hitFlash - dt * 4);
-  if (fruit.hitScale < 1) fruit.hitScale = Math.min(1, fruit.hitScale + dt * 4);
-  else if (fruit.hitScale > 1) fruit.hitScale = Math.max(1, fruit.hitScale - dt * 4);
+  if (fruit.hitScale > 1) fruit.hitScale = Math.max(1, fruit.hitScale - dt * 3);
+  else if (fruit.hitScale < 1) fruit.hitScale = Math.min(1, fruit.hitScale + dt * 3);
 
-  // Messer
-  if (knife.visible){
-    knife.x += (knife.targetX - knife.x) * Math.min(1, dt * 20);
-    knife.y += (knife.targetY - knife.y) * Math.min(1, dt * 20);
-    knife.trail.push({ x: knife.x, y: knife.y });
-    if (knife.trail.length > 12) knife.trail.shift();
-    if (knife.slicing > 0) knife.slicing -= dt * 4;
+  // Fliegende Messer
+  for (const fk of flyingKnives){
+    fk.t += dt;
+    const p = Math.min(1, fk.t / fk.duration);
+    // Easing: ease-out
+    const e = 1 - Math.pow(1 - p, 2.5);
+    fk.x = fk.startX + (fk.targetX - fk.startX) * e;
+    fk.y = fk.startY + (fk.targetY - fk.startY) * e;
+
+    fk.trail.push({ x: fk.x, y: fk.y });
+    if (fk.trail.length > 8) fk.trail.shift();
+
+    if (p >= 1 && !fk.landed){
+      fk.landed = true;
+      onKnifeLanded(fk);
+    }
+  }
+  // Fliegende Messer nach Landung entfernen (landed wird nach 0.05s entfernt)
+  for (let i = flyingKnives.length - 1; i >= 0; i--){
+    if (flyingKnives[i].landed && flyingKnives[i].t > flyingKnives[i].duration + 0.05){
+      flyingKnives.splice(i, 1);
+    }
   }
 
-  // Effekte
-  for (const se of sliceEffects) se.life -= dt * 2.5;
-  sliceEffects = sliceEffects.filter(se => se.life > 0);
-
+  // Juice-Partikel
   for (const p of juiceParticles){
     p.x += p.vx * dt;
     p.y += p.vy * dt;
@@ -728,6 +763,7 @@ function update(dt){
   }
   juiceParticles = juiceParticles.filter(p => p.life > 0);
 
+  // Hit-Splash
   for (const s of hitSplash){
     s.x += s.vx * dt;
     s.y += s.vy * dt;
@@ -735,7 +771,11 @@ function update(dt){
   }
   hitSplash = hitSplash.filter(s => s.life > 0);
 
-  // Deko-Sterne
+  // Click-Marker
+  for (const m of clickMarkers) m.life -= dt * 2;
+  clickMarkers = clickMarkers.filter(m => m.life > 0);
+
+  // Sterne
   for (const s of starParticles){
     s.y += s.vy * dt;
     s.x += s.vx * dt;
@@ -748,87 +788,166 @@ function update(dt){
 }
 
 /* =========================================================
-   SLICE
+   KLICK → Messer fliegt rein
    ========================================================= */
-function trySlice(px, py){
+function launchKnife(clickX, clickY){
   if (gameOverFlag) return;
-  if (!fruit.visible) return;
 
+  // Wenn in der Luft schon ein Messer fliegt → warten (nur eins pro Moment)
+  if (flyingKnives.length > 0) return;
+
+  const knifeDef = KNIVES.find(x => x.id === save.selectedKnife) || KNIVES[0];
+  const knifeSize = 70;
+
+  // Startpunkt: von einer zufälligen Seite (links/rechts/oben/unten)
+  const side = Math.floor(Math.random() * 4);
+  let sx, sy;
+  const off = 120;
+  switch(side){
+    case 0: sx = -off; sy = clickY; break;          // links
+    case 1: sx = W + off; sy = clickY; break;       // rechts
+    case 2: sx = clickX; sy = -off; break;          // oben
+    default: sx = clickX; sy = H + off; break;      // unten
+  }
+
+  // Berechne Winkel von Start zu Klick
+  const angle = Math.atan2(clickY - sy, clickX - sx);
+
+  const distance = Math.hypot(clickX - sx, clickY - sy);
+  const duration = Math.max(0.18, distance / 2000); // ~konstante Geschwindigkeit
+
+  flyingKnives.push({
+    startX: sx, startY: sy,
+    x: sx, y: sy,
+    targetX: clickX, targetY: clickY,
+    angle: angle,
+    def: knifeDef,
+    size: knifeSize,
+    t: 0,
+    duration: duration,
+    trail: [],
+    landed: false
+  });
+
+  // Klick-Marker
+  clickMarkers.push({ x: clickX, y: clickY, life: 1, color: '#ffffff' });
+}
+
+/* =========================================================
+   LANDUNG → Treffer / Eigenes Messer / Fehler
+   ========================================================= */
+function onKnifeLanded(fk){
+  const kx = fk.targetX;
+  const ky = fk.targetY;
+
+  // Frucht-Center in Welt
   const fcx = fruit.x + fruit.wobbleX;
   const fcy = fruit.y + fruit.wobbleY;
-  const dx = px - fcx;
-  const dy = py - fcy;
-  const dist = Math.sqrt(dx * dx + dy * dy);
-  const hitRadius = fruit.size * 0.5 * fruit.hitScale;
+  const r = fruit.size / 2 * fruit.hitScale;
 
-  if (dist <= hitRadius){
-    // === TREFFER ===
+  // 1) Prüfe, ob eigenes Messer getroffen wurde
+  for (const stuck of stuckKnives){
+    const world = getStuckKnifeWorldPos(stuck);
+    const dx = kx - world.x;
+    const dy = ky - world.y;
+    const dist = Math.sqrt(dx * dx + dy * dy);
+    // Klingenlänge ca. size*0.55 → Treffer-Radius
+    if (dist < world.size * 0.45){
+      // Eigenes Messer getroffen → Verloren!
+      selfHit(world.x, world.y);
+      return;
+    }
+  }
+
+  // 2) Prüfe Frucht-Treffer
+  const dx = kx - fcx;
+  const dy = ky - fcy;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+
+  if (dist <= r){
+    // === TREFFER: Messer steckt in Frucht ===
     hits++;
     fruit.hitFlash = 1;
-    fruit.hitScale = 1.12;
-    flashT = 0.3;
+    fruit.hitScale = 1.08;
+    flashT = 0.25;
 
-    // Slice-Effekt
-    const angle = Math.atan2(dy, dx);
-    const sliceLen = fruit.size * 0.6;
-    sliceEffects.push({
-      x1: fcx - Math.cos(angle) * sliceLen,
-      y1: fcy - Math.sin(angle) * sliceLen,
-      x2: fcx + Math.cos(angle) * sliceLen,
-      y2: fcy + Math.sin(angle) * sliceLen,
-      color: '#ffffff',
-      life: 1
+    // Lokale Position relativ zur Frucht (mit Rotation)
+    const cosR = Math.cos(-fruit.rotation);
+    const sinR = Math.sin(-fruit.rotation);
+    const relX = kx - fcx;
+    const relY = ky - fcy;
+    const localX = relX * cosR - relY * sinR;
+    const localY = relX * sinR + relY * cosR;
+    const localAngle = fk.angle - fruit.rotation;
+
+    stuckKnives.push({
+      localX: localX,
+      localY: localY,
+      localAngle: localAngle,
+      def: fk.def,
+      size: fk.size
     });
 
     // Saft-Partikel
     const fc = fruit.colors;
-    for (let i = 0; i < 22; i++){
+    for (let i = 0; i < 20; i++){
       const a = Math.random() * Math.PI * 2;
-      const sp = 120 + Math.random() * 350;
+      const sp = 100 + Math.random() * 320;
       juiceParticles.push({
-        x: fcx, y: fcy,
+        x: kx, y: ky,
         vx: Math.cos(a) * sp,
         vy: Math.sin(a) * sp,
-        size: 3 + Math.random() * 6,
+        size: 3 + Math.random() * 5,
         color: fc[0],
         life: 0.6 + Math.random() * 0.5,
         maxLife: 1
       });
     }
 
-    // Neue Frucht (andere Sorte, neue Drehrichtung)
-    fruit.fruitIndex = (fruit.fruitIndex + 1 + Math.floor(Math.random() * (FRUITS.length - 1))) % FRUITS.length;
-    fruit.colors = FRUITS[fruit.fruitIndex].colors;
-    fruit.leaf = FRUITS[fruit.fruitIndex].leaf;
-
-    // Combo-Popup
-    if (hits % 3 === 0 && hits < HITS_PER_LEVEL){
+    // Combo
+    if (hits % 5 === 0 && hits < hitsRequired){
       showCombo(hits + 'x');
     }
 
     updateHUD();
 
-    if (hits >= HITS_PER_LEVEL){
+    if (hits >= hitsRequired){
       levelComplete();
     }
   } else {
-    // === FEHLER ===
+    // === FEHLER: Daneben ===
     misses++;
-    for (let i = 0; i < 10; i++){
+    for (let i = 0; i < 12; i++){
       const a = Math.random() * Math.PI * 2;
-      const sp = 50 + Math.random() * 180;
+      const sp = 60 + Math.random() * 200;
       hitSplash.push({
-        x: px, y: py,
+        x: kx, y: ky,
         vx: Math.cos(a) * sp,
         vy: Math.sin(a) * sp,
-        life: 0.5
+        life: 0.6
       });
     }
     updateHUD();
     if (misses >= MAX_MISSES){
-      gameOver();
+      gameOver('Zu viele Fehler!');
     }
   }
+}
+
+function selfHit(x, y){
+  // Rote Explosion
+  for (let i = 0; i < 30; i++){
+    const a = Math.random() * Math.PI * 2;
+    const sp = 100 + Math.random() * 400;
+    hitSplash.push({
+      x: x, y: y,
+      vx: Math.cos(a) * sp,
+      vy: Math.sin(a) * sp,
+      life: 0.8
+    });
+  }
+  flashT = 0.6;
+  gameOver('Dein eigenes Messer getroffen!');
 }
 
 /* =========================================================
@@ -855,7 +974,7 @@ function showBadge(text){
    ========================================================= */
 function updateHUD(){
   document.getElementById('levelVal').textContent = level;
-  document.getElementById('hitsVal').textContent = hits + '/' + HITS_PER_LEVEL;
+  document.getElementById('hitsVal').textContent = hits + '/' + hitsRequired;
   document.getElementById('missVal').textContent = misses + '/' + MAX_MISSES;
 }
 
@@ -878,13 +997,15 @@ function startLevel(lvl){
   level = lvl;
   hits = 0;
   misses = 0;
+  hitsRequired = getHitsRequired(lvl);
   gameOverFlag = false;
   flashT = 0;
-  sliceEffects = [];
   juiceParticles = [];
   hitSplash = [];
+  clickMarkers = [];
+  flyingKnives = [];
+  stuckKnives = [];
 
-  // Deko-Sterne
   starParticles = [];
   for (let i = 0; i < 30; i++){
     starParticles.push({
@@ -898,24 +1019,13 @@ function startLevel(lvl){
     });
   }
 
-  // Messer
-  knife.x = W / 2;
-  knife.y = H / 2;
-  knife.targetX = W / 2;
-  knife.targetY = H / 2;
-  knife.visible = true;
-  knife.trail = [];
-
-  // Frucht (zufällige Sorte)
   const fi = Math.floor(Math.random() * FRUITS.length);
-  fruit.fruitIndex = fi;
   fruit.colors = FRUITS[fi].colors;
   fruit.leaf = FRUITS[fi].leaf;
   fruit.rotation = 0;
   fruit.hitFlash = 0;
   fruit.hitScale = 1;
   fruit.wobblePhase = 0;
-  fruit.visible = true;
 
   updateHUD();
   setScreen('playing');
@@ -950,13 +1060,14 @@ function levelComplete(){
   setTimeout(() => setScreen('complete'), 1200);
 }
 
-function gameOver(){
+function gameOver(reason){
+  if (gameOverFlag) return;
   gameOverFlag = true;
   save.clips += hits;
   persist();
   document.getElementById('goLevel').textContent = level;
-  document.getElementById('goInfo').textContent = 'Treffer: ' + hits + '/' + HITS_PER_LEVEL;
-  setTimeout(() => setScreen('over'), 500);
+  document.getElementById('goInfo').textContent = reason;
+  setTimeout(() => setScreen('over'), 600);
 }
 
 /* =========================================================
@@ -968,7 +1079,8 @@ function render(){
   drawBackground();
 
   if (screen === 'playing' || screen === 'complete' || screen === 'over'){
-    drawFruit(fruit);
+    drawFruitBody();
+    drawStuckKnives();
     drawJuiceParticles();
     for (const s of hitSplash){
       ctx.save();
@@ -979,8 +1091,8 @@ function render(){
       ctx.fill();
       ctx.restore();
     }
-    for (const se of sliceEffects) drawSliceEffect(se);
-    if (knife.visible) drawKnife(knife);
+    drawFlyingKnives();
+    drawClickMarkers();
   }
 
   if (flashT > 0){
@@ -1014,7 +1126,7 @@ function renderLevels(){
     stars.className = 'stars';
     if (isExtreme) stars.textContent = '🔥🔥';
     else if (isHard) stars.textContent = '🔥';
-    else stars.textContent = '★';
+    else stars.textContent = '⭐';
     card.appendChild(stars);
 
     if (unlocked) card.onclick = () => startLevel(i);
@@ -1043,31 +1155,7 @@ function renderShop(){
     pc.style.width = '140px'; pc.style.height = '60px';
     const pctx = pc.getContext('2d');
     pctx.translate(70, 30);
-
-    if (k.glow){
-      pctx.shadowColor = k.glow;
-      pctx.shadowBlur = 15;
-    }
-    pctx.fillStyle = k.blade;
-    pctx.beginPath();
-    pctx.moveTo(-45, -6);
-    pctx.lineTo(45, -3);
-    pctx.lineTo(50, 0);
-    pctx.lineTo(45, 3);
-    pctx.lineTo(-45, 6);
-    pctx.closePath();
-    pctx.fill();
-    pctx.shadowBlur = 0;
-    pctx.fillStyle = k.edge;
-    pctx.beginPath();
-    pctx.moveTo(-45, -6);
-    pctx.lineTo(45, -3);
-    pctx.lineTo(50, 0);
-    pctx.lineTo(-45, -2);
-    pctx.closePath();
-    pctx.fill();
-    pctx.fillStyle = k.handle;
-    pctx.fillRect(-65, -7, 18, 14);
+    drawKnifeShape(pctx, k, 90);
     preview.appendChild(pc);
     card.appendChild(preview);
 
@@ -1117,40 +1205,17 @@ function getPointerPos(e){
   return { x: clientX - rect.left, y: clientY - rect.top };
 }
 
-canvas.addEventListener('mousemove', (e) => {
-  if (screen !== 'playing') return;
-  const pos = getPointerPos(e);
-  knife.targetX = pos.x;
-  knife.targetY = pos.y;
-});
-
 canvas.addEventListener('mousedown', (e) => {
-  if (screen !== 'playing') return;
+  if (screen !== 'playing' || gameOverFlag) return;
   const pos = getPointerPos(e);
-  knife.x = pos.x;
-  knife.y = pos.y;
-  knife.angle = Math.random() * Math.PI * 2;
-  knife.slicing = 1;
-  trySlice(pos.x, pos.y);
+  launchKnife(pos.x, pos.y);
 });
 
 canvas.addEventListener('touchstart', (e) => {
-  if (screen !== 'playing') return;
+  if (screen !== 'playing' || gameOverFlag) return;
   e.preventDefault();
   const pos = getPointerPos(e);
-  knife.x = pos.x;
-  knife.y = pos.y;
-  knife.angle = Math.random() * Math.PI * 2;
-  knife.slicing = 1;
-  trySlice(pos.x, pos.y);
-}, { passive: false });
-
-canvas.addEventListener('touchmove', (e) => {
-  if (screen !== 'playing') return;
-  e.preventDefault();
-  const pos = getPointerPos(e);
-  knife.targetX = pos.x;
-  knife.targetY = pos.y;
+  launchKnife(pos.x, pos.y);
 }, { passive: false });
 
 /* =========================================================
